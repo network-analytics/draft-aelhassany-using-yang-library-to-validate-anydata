@@ -1,0 +1,313 @@
+{
+  "ietf-yang-library:yang-library": {
+    "module-set": [
+      {
+        "name": "complete",
+        "module": [
+          {
+            "name": "yang",
+            "revision": "2022-06-16",
+            "namespace": "urn:ietf:params:xml:ns:yang:1"
+          },
+          {
+            "name": "ietf-yang-schema-mount",
+            "revision": "2019-01-14",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-schema-mount"
+          },
+          {
+            "name": "ietf-datastores",
+            "revision": "2018-02-14",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-datastores"
+          },
+          {
+            "name": "ietf-yang-library",
+            "revision": "2019-01-04",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-library"
+          },
+          {
+            "name": "ietf-yang-push",
+            "revision": "2019-09-09",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-push",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-yang-push@2019-09-09.yang"
+            ],
+            "feature": [
+              "on-change"
+            ]
+          },
+          {
+            "name": "ietf-subscribed-notifications",
+            "revision": "2019-09-09",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-subscribed-notifications",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-subscribed-notifications@2019-09-09.yang"
+            ],
+            "feature": [
+              "configured",
+              "dscp",
+              "encode-json",
+              "encode-xml",
+              "interface-designation",
+              "qos",
+              "replay",
+              "subtree",
+              "supports-vrf",
+              "xpath"
+            ]
+          },
+          {
+            "name": "ietf-interfaces",
+            "revision": "2018-02-20",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-interfaces",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-interfaces@2018-02-20.yang"
+            ],
+            "feature": [
+              "arbitrary-names",
+              "pre-provisioning",
+              "if-mib"
+            ]
+          },
+          {
+            "name": "ietf-network-instance",
+            "revision": "2019-01-21",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-network-instance",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-network-instance@2019-01-21.yang"
+            ]
+          },
+          {
+            "name": "ietf-ip",
+            "revision": "2018-02-22",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-ip",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-ip@2018-02-22.yang"
+            ],
+            "feature": [
+              "ipv4-non-contiguous-netmasks",
+              "ipv6-privacy-autoconf"
+            ]
+          }
+        ],
+        "import-only-module": [
+          {
+            "name": "ietf-yang-metadata",
+            "revision": "2016-08-05",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-metadata"
+          },
+          {
+            "name": "ietf-inet-types",
+            "revision": "2013-07-15",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-inet-types"
+          },
+          {
+            "name": "ietf-yang-types",
+            "revision": "2013-07-15",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-types"
+          },
+          {
+            "name": "ietf-inet-types",
+            "revision": "2021-02-22",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-inet-types",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-inet-types@2021-02-22.yang"
+            ]
+          },
+          {
+            "name": "ietf-yang-types",
+            "revision": "2023-01-23",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-types",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-yang-types@2023-01-23.yang"
+            ]
+          },
+          {
+            "name": "ietf-yang-structure-ext",
+            "revision": "2020-06-17",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-structure-ext"
+          },
+          {
+            "name": "ietf-netconf-acm",
+            "revision": "2018-02-14",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-netconf-acm",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-netconf-acm@2018-02-14.yang"
+            ]
+          },
+          {
+            "name": "ietf-restconf",
+            "revision": "2017-01-26",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-restconf",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-restconf@2017-01-26.yang"
+            ]
+          },
+          {
+            "name": "ietf-yang-patch",
+            "revision": "2017-02-22",
+            "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-patch",
+            "location": [
+              "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-yang-patch@2017-02-22.yang"
+            ]
+          }
+        ]
+      }
+    ],
+    "schema": [
+      {
+        "name": "complete",
+        "module-set": [
+          "complete"
+        ]
+      }
+    ],
+    "content-id": "34"
+  },
+  "ietf-yang-library:modules-state": {
+    "module-set-id": "34",
+    "module": [
+      {
+        "name": "ietf-yang-metadata",
+        "revision": "2016-08-05",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-metadata",
+        "conformance-type": "import"
+      },
+      {
+        "name": "yang",
+        "revision": "2022-06-16",
+        "namespace": "urn:ietf:params:xml:ns:yang:1",
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-inet-types",
+        "revision": "2013-07-15",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-inet-types",
+        "conformance-type": "import"
+      },
+      {
+        "name": "ietf-yang-types",
+        "revision": "2013-07-15",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-types",
+        "conformance-type": "import"
+      },
+      {
+        "name": "ietf-yang-schema-mount",
+        "revision": "2019-01-14",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-schema-mount",
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-inet-types",
+        "revision": "2021-02-22",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-inet-types@2021-02-22.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-inet-types",
+        "conformance-type": "import"
+      },
+      {
+        "name": "ietf-yang-types",
+        "revision": "2023-01-23",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-yang-types@2023-01-23.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-types",
+        "conformance-type": "import"
+      },
+      {
+        "name": "ietf-yang-structure-ext",
+        "revision": "2020-06-17",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-structure-ext",
+        "conformance-type": "import"
+      },
+      {
+        "name": "ietf-datastores",
+        "revision": "2018-02-14",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-datastores",
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-yang-library",
+        "revision": "2019-01-04",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-library",
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-yang-push",
+        "revision": "2019-09-09",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-yang-push@2019-09-09.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-push",
+        "feature": [
+          "on-change"
+        ],
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-subscribed-notifications",
+        "revision": "2019-09-09",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-subscribed-notifications@2019-09-09.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-subscribed-notifications",
+        "feature": [
+          "configured",
+          "dscp",
+          "encode-json",
+          "encode-xml",
+          "interface-designation",
+          "qos",
+          "replay",
+          "subtree",
+          "supports-vrf",
+          "xpath"
+        ],
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-interfaces",
+        "revision": "2018-02-20",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-interfaces@2018-02-20.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-interfaces",
+        "feature": [
+          "arbitrary-names",
+          "pre-provisioning",
+          "if-mib"
+        ],
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-netconf-acm",
+        "revision": "2018-02-14",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-netconf-acm@2018-02-14.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-netconf-acm",
+        "conformance-type": "import"
+      },
+      {
+        "name": "ietf-network-instance",
+        "revision": "2019-01-21",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-network-instance@2019-01-21.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-network-instance",
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-ip",
+        "revision": "2018-02-22",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-ip@2018-02-22.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-ip",
+        "feature": [
+          "ipv4-non-contiguous-netmasks",
+          "ipv6-privacy-autoconf"
+        ],
+        "conformance-type": "implement"
+      },
+      {
+        "name": "ietf-restconf",
+        "revision": "2017-01-26",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-restconf@2017-01-26.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-restconf",
+        "conformance-type": "import"
+      },
+      {
+        "name": "ietf-yang-patch",
+        "revision": "2017-02-22",
+        "schema": "file://home/user1/draft-aelhassany-using-yang-library-to-validate-anydata/examples/models/ietf-yang-patch@2017-02-22.yang",
+        "namespace": "urn:ietf:params:xml:ns:yang:ietf-yang-patch",
+        "conformance-type": "import"
+      }
+    ]
+  }
+}

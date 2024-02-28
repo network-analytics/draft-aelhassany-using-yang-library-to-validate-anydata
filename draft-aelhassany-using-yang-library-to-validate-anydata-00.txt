@@ -1,0 +1,280 @@
+
+
+
+
+NETCONF                                                     A. Elhassany
+Internet-Draft                                                  Swisscom
+Intended status: Informational                          29 February 2024
+Expires: 1 September 2024
+
+
+               Validating anydata in YANG Library context
+            draft-using-yang-library-to-validate-anydata-00
+
+Abstract
+
+   This document describes a method to use yang-library to validate YANG
+   data nodes with type anydata.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 1 September 2024.
+
+Copyright Notice
+
+   Copyright (c) 2024 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+
+
+
+
+
+
+Elhassany               Expires 1 September 2024                [Page 1]
+
+Internet-Draft              Abbreviated Title              February 2024
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   2
+   3.  Validating "anydata" Data Tree  . . . . . . . . . . . . . . .   3
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   3
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   3
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   3
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   3
+     6.2.  Informative References  . . . . . . . . . . . . . . . . .   4
+   Appendix A.  Appendix 1 [REPLACE/DELETE]  . . . . . . . . . . . .   4
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   4
+   Contributors  . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   5
+
+1.  Introduction
+
+   YANG [RFC7950] defines the "anydata" statement to represent an
+   unknown set of nodes that can be modeled with YANG at design time.
+   However, YANG [RFC7950] left the verification of the "anydata" tree
+   open to be done using external means.  Several IETF models, e.g.,
+   [RFC7895], [RFC8526], [RFC9144], [RFC8639], [RFC8641], and [RFC8040],
+   use "anydata" in their definitions.  Current YANG implementations
+   accept syntactically valid YANG data nodes as children of an
+   "anydata" node but do not check the semantics of these data nodes
+   against a YANG schema.  This creates a real problem for any consumer
+   of these models when validating all leaves of the YANG data tree.
+
+   In this document we propese using YANG Library [RFC7895] to define
+   the context in which anydata trees are validated.  This would require
+   the YANG tooling to implement an optional flag that enables a strict
+   mode validation for "anydata" in the context of a YANG library.
+
+1.1.  Requirements Language
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.  Terminology
+
+   We use the terminology defined in YANG [RFC7950] for schema node and
+   schema tree but refine data node and data tree to be more precise.
+
+
+
+
+
+Elhassany               Expires 1 September 2024                [Page 2]
+
+Internet-Draft              Abbreviated Title              February 2024
+
+
+   *  data node: A node in the schema tree that can be instantiated in a
+      data tree.  One of container, leaf, leaf-list, list, anydata, and
+      anyxml.  We do not discuss anyxml in this document, and this
+      document does not change how YANG handles anyxml data nodes.
+
+   *  instantiated data node: an instantiated instance of a data node
+      that contains before fully qualified name (module namespace +
+      identifier) for the data node and the data modeled within YANG.
+
+   *  instantiated data tree: is what YANG [RFC7950] defines as "data
+      tree".  Adding the term "instantiated" precisely indicates that
+      this tree is an instance of specific data modeled with YANG.
+
+   *  data tree: a tree of data nodes (with no values).
+
+3.  Validating "anydata" Data Tree
+
+   The current YANG encodings, XML, JSON, and CBOR, encode instantiated
+   data nodes with fully qualified name using the module's namespace and
+   a local name.  The module's namespace can be either explicit or
+   assumed from a default namespace defined in the top data tree.
+
+   This document introduces a new YANG validation option: anydata-
+   strict-mode.  In this mode, a YANG data parser MUST accept a YANG
+   library as input along the YANG data file.  When this option is
+   enabled, any instantiated data node (B) that is a child of anydata
+   node (A) is accepted to be valid only if the qualified name of the
+   node A is found in one of the data trees defined by the YANG library
+   AND the instantiated data tree rooted by A is valid according to the
+   data node of A.
+
+4.  IANA Considerations
+
+   This memo includes no request to IANA.
+
+5.  Security Considerations
+
+   TBD
+
+6.  References
+
+6.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+Elhassany               Expires 1 September 2024                [Page 3]
+
+Internet-Draft              Abbreviated Title              February 2024
+
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
+              RFC 7950, DOI 10.17487/RFC7950, August 2016,
+              <https://www.rfc-editor.org/info/rfc7950>.
+
+   [RFC7895]  Bierman, A., Bjorklund, M., and K. Watsen, "YANG Module
+              Library", RFC 7895, DOI 10.17487/RFC7895, June 2016,
+              <https://www.rfc-editor.org/info/rfc7895>.
+
+6.2.  Informative References
+
+   [RFC8526]  Bjorklund, M., Schoenwaelder, J., Shafer, P., Watsen, K.,
+              and R. Wilton, "NETCONF Extensions to Support the Network
+              Management Datastore Architecture", RFC 8526,
+              DOI 10.17487/RFC8526, March 2019,
+              <https://www.rfc-editor.org/info/rfc8526>.
+
+   [RFC9144]  Clemm, A., Qu, Y., Tantsura, J., and A. Bierman,
+              "Comparison of Network Management Datastore Architecture
+              (NMDA) Datastores", RFC 9144, DOI 10.17487/RFC9144,
+              December 2021, <https://www.rfc-editor.org/info/rfc9144>.
+
+   [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
+              Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
+              <https://www.rfc-editor.org/info/rfc8040>.
+
+   [RFC8639]  Voit, E., Clemm, A., Gonzalez Prieto, A., Nilsen-Nygaard,
+              E., and A. Tripathy, "Subscription to YANG Notifications",
+              RFC 8639, DOI 10.17487/RFC8639, September 2019,
+              <https://www.rfc-editor.org/info/rfc8639>.
+
+   [RFC8641]  Clemm, A. and E. Voit, "Subscription to YANG Notifications
+              for Datastore Updates", RFC 8641, DOI 10.17487/RFC8641,
+              September 2019, <https://www.rfc-editor.org/info/rfc8641>.
+
+Appendix A.  Appendix 1 [REPLACE/DELETE]
+
+   This becomes an Appendix [REPLACE]
+
+Acknowledgements
+
+   This template uses extracts from templates written by Pekka Savola,
+   Elwyn Davies and Henrik Levkowetz.  [REPLACE]
+
+
+
+
+
+Elhassany               Expires 1 September 2024                [Page 4]
+
+Internet-Draft              Abbreviated Title              February 2024
+
+
+Contributors
+
+   Thanks to all of the contributors.  [REPLACE]
+
+Author's Address
+
+   Ahmed Elhassany
+   Swisscom
+   Binzring 17
+   CH- Zuerich 8045
+   Switzerland
+   Email: ahmed.elhassany@swisscom.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Elhassany               Expires 1 September 2024                [Page 5]

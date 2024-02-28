@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="rfc7991bis.rnc"?>
+<!DOCTYPE rfc [
+<!ENTITY nbsp "&#160;">
+<!ENTITY zwsp "&#8203;">
+<!ENTITY nbhy "&#8209;">
+<!ENTITY wj "&#8288;">
+]>
+<rfc category="info" docName="draft-using-yang-library-to-validate-anydata-00"
+     ipr="trust200902" obsoletes="" submissionType="IETF" updates=""
+     version="3" xml:lang="en" xmlns:xi="http://www.w3.org/2001/XInclude"
+     xmlns:ns2="http://www.w3.org/2000/svg"
+     xmlns:ns="http://www.w3.org/1999/xlink">
+  <front>
+    <title abbrev="Abbreviated Title">Validating anydata in YANG Library
+    context</title>
+
+    <seriesInfo name="Internet-Draft"
+                value="draft-rfcxml-general-template-standard-00 [REPLACE]"/>
+
+    <author fullname="Ahmed Elhassany" initials="A" surname="Elhassany">
+      <organization>Swisscom</organization>
+
+      <address>
+        <postal>
+          <street>Binzring 17</street>
+          <city>Zuerich 8045</city>
+          <region/>
+          <code/>
+          <country>Switzerland</country>
+        </postal>
+        <phone/>
+        <email>ahmed.elhassany@swisscom.com</email>
+        <uri/>
+      </address>
+    </author>
+
+    <date year="2024"/>
+
+    <area>General</area>
+
+    <workgroup>NETCONF</workgroup>
+
+    <keyword>keyword</keyword>
+
+    <abstract>
+      <t>This document describes a method to use yang-library to validate YANG
+      data nodes with type anydata.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section>
+      <name>Introduction</name>
+
+      <t><xref target="RFC7950">YANG</xref> defines the "anydata" statement to
+      represent an unknown set of nodes that can be modeled with YANG at
+      design time. However, <xref target="RFC7950">YANG</xref> left the
+      verification of the "anydata" tree open to be done using external means.
+      Several IETF models, e.g., <xref target="RFC7895"/>, <xref
+      target="RFC8526"/>, <xref target="RFC9144"/>, <xref target="RFC8639"/>,
+      <xref target="RFC8641"/>, and <xref target="RFC8040"/>, use "anydata" in
+      their definitions. Current YANG implementations accept syntactically
+      valid YANG data nodes as children of an "anydata" node but do not check
+      the semantics of these data nodes against a YANG schema. This creates a
+      real problem for any consumer of these models when validating all leaves
+      of the YANG data tree.</t>
+
+      <t>In this document we propese using <xref target="RFC7895">YANG
+      Library</xref> to define the context in which anydata trees are
+      validated. This would require the YANG tooling to implement an optional
+      flag that enables a strict mode validation for "anydata" in the context
+      of a YANG library.</t>
+
+      <section>
+        <name>Requirements Language</name>
+
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+        "OPTIONAL" in this document are to be interpreted as described in BCP
+        14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only
+        when, they appear in all capitals, as shown here.</t>
+      </section>
+    </section>
+
+    <section anchor="terminology" numbered="true" toc="include">
+      <name slugifiedName="name-terminology">Terminology</name>
+
+      <t>We use the terminology defined in <xref target="RFC7950">YANG</xref>
+      for schema node and schema tree but refine data node and data tree to be
+      more precise.</t>
+
+      <ul>
+        <li>data node: A node in the schema tree that can be instantiated in a
+        data tree. One of container, leaf, leaf-list, list, anydata, and
+        anyxml. We do not discuss anyxml in this document, and this document
+        does not change how YANG handles anyxml data nodes.</li>
+
+        <li>instantiated data node: an instantiated instance of a data node
+        that contains before fully qualified name (module namespace +
+        identifier) for the data node and the data modeled within YANG.</li>
+
+        <li>instantiated data tree: is what <xref target="RFC7950">YANG</xref>
+        defines as "data tree". Adding the term "instantiated" precisely
+        indicates that this tree is an instance of specific data modeled with
+        YANG.</li>
+
+        <li>data tree: a tree of data nodes (with no values).</li>
+      </ul>
+    </section>
+
+    <section>
+      <name>Validating "anydata" Data Tree</name>
+
+      <t>The current YANG encodings, XML, JSON, and CBOR, encode instantiated
+      data nodes with fully qualified name using the module's namespace and a
+      local name. The module's namespace can be either explicit or assumed
+      from a default namespace defined in the top data tree.</t>
+
+      <t>This document introduces a new YANG validation option:
+      anydata-strict-mode. In this mode, a YANG data parser MUST accept a YANG
+      library as input along the YANG data file. When this option is enabled,
+      any instantiated data node (B) that is a child of anydata node (A) is
+      accepted to be valid only if the qualified name of the node A is found
+      in one of the data trees defined by the YANG library AND the
+      instantiated data tree rooted by A is valid according to the data node
+      of A.</t>
+    </section>
+
+    <section anchor="IANA">
+      <name>IANA Considerations</name>
+
+      <t>This memo includes no request to IANA.</t>
+    </section>
+
+    <section anchor="Security">
+  
+      <name>Security Considerations</name>
+
+      <t>TBD</t>
+    </section>
+  </middle>
+
+  <back>
+    <references>
+      <name>References</name>
+
+      <references>
+        <name>Normative References</name>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7895.xml"/>
+      </references>
+
+      <references>
+        <name>Informative References</name>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8526.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9144.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8040.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8639.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8641.xml"/>
+      </references>
+    </references>
+
+    <section>
+      <name>Appendix 1 [REPLACE/DELETE]</name>
+
+      <t>This becomes an Appendix [REPLACE]</t>
+    </section>
+
+    <section anchor="Acknowledgements" numbered="false">
+      <!-- [REPLACE/DELETE] an Acknowledgements section is optional -->
+
+      <name>Acknowledgements</name>
+
+      <t>This template uses extracts from templates written by Pekka Savola,
+      Elwyn Davies and Henrik Levkowetz. [REPLACE]</t>
+    </section>
+
+    <section anchor="Contributors" numbered="false">
+      <!-- [REPLACE/DELETE] a Contributors section is optional -->
+
+      <name>Contributors</name>
+
+      <t>Thanks to all of the contributors. [REPLACE]</t>
+
+      <!-- [CHECK] it is optional to add a <contact> record for some or all contributors -->
+    </section>
+  </back>
+</rfc>
