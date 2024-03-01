@@ -12,7 +12,7 @@
      xmlns:ns2="http://www.w3.org/2000/svg"
      xmlns:ns="http://www.w3.org/1999/xlink">
   <front>
-    <title abbrev="Abbreviated Title">Validating anydata in YANG Library
+    <title abbrev="Anydata validation">Validating anydata in YANG Library
     context</title>
 
     <seriesInfo name="Internet-Draft"
@@ -61,17 +61,17 @@
       <name>Introduction</name>
 
       <t><xref target="RFC7950">YANG</xref> defines the "anydata" statement to
-      represent an unknown set of nodes that can be modeled with YANG at
-      design time. However, <xref target="RFC7950">YANG</xref> left the
-      verification of the "anydata" tree open to be done using external means.
-      Several IETF models, e.g., <xref target="RFC7895"/>, <xref
-      target="RFC8526"/>, <xref target="RFC9144"/>, <xref target="RFC8639"/>,
-      <xref target="RFC8641"/>, and <xref target="RFC8040"/>, use "anydata" in
-      their definitions. Current YANG implementations accept syntactically
-      valid YANG data nodes as children of an "anydata" node but do not check
-      the semantics of these data nodes against a YANG schema. This creates a
-      real problem for any consumer of these models when validating all leaves
-      of the YANG data tree.</t>
+      represent an unknown set of YANG nodes for which the data model is not
+      known at module design time. However, <xref target="RFC7950">YANG</xref>
+      left the verification of the "anydata" tree open to be done using
+      external means. Several IETF models, e.g., <xref target="RFC7895"/>,
+      <xref target="RFC8526"/>, <xref target="RFC9144"/>, <xref
+      target="RFC8639"/>, <xref target="RFC8641"/>, and <xref
+      target="RFC8040"/>, use "anydata" in their definitions. Current YANG
+      implementations accept syntactically valid YANG data nodes as children
+      of an "anydata" node but do not check the semantics of these data nodes
+      against a YANG schema. This creates a real problem for any consumer of
+      these models when validating all leaves of the YANG data tree.</t>
 
       <t><xref target="RFC8528">YANG Schema Mount</xref> allows mounting
       complete data models at implementation and run time. While powerful,
@@ -141,15 +141,16 @@
       node (NodeA) is accepted to be valid only if (i) the qualified name of
       the node NodeB is found in one of the data trees defined by the YANG
       library AND (ii) the instantiated data tree rooted by NodeB is valid
-      incomplete instantiated tree according to the data node of NodeB.</t>
+      incomplete instantiated data tree according to the data node of NodeB.
+      </t>
 
       <t>The first condition ensures the completeness of the YANG library, and
-      no subtree can be included as a child of any data node unless a schema
-      is defined for all the children of any data subtree and specified in the
+      no subtree can be included as a child of anydata node unless a schema
+      is defined for all the children of anydata subtree and specified in the
       YANG library. The second condition applies a regular YANG validation
       against the subtree of anydata, considering that the subtree of anydata
-      could be generated using an XPath <xref target="RFC8641"/> or a subtree 
-      filter <xref target="RFC6241"/>. Thus, the validator MUST consider this 
+      could be generated using an XPath <xref target="RFC8641"/> or a subtree
+      filter <xref target="RFC6241"/>. Thus, the validator MUST consider this
       subtree incomplete and ignore any missing leaves.</t>
     </section>
 

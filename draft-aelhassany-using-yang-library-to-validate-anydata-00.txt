@@ -55,13 +55,13 @@ Copyright Notice
 
 Elhassany               Expires 2 September 2024                [Page 1]
 
-Internet-Draft              Abbreviated Title                 March 2024
+Internet-Draft             Anydata validation                 March 2024
 
 
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   2
+     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   3
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
    3.  Validating "anydata" Data Tree  . . . . . . . . . . . . . . .   3
    4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
@@ -75,15 +75,16 @@ Table of Contents
 1.  Introduction
 
    YANG [RFC7950] defines the "anydata" statement to represent an
-   unknown set of nodes that can be modeled with YANG at design time.
-   However, YANG [RFC7950] left the verification of the "anydata" tree
-   open to be done using external means.  Several IETF models, e.g.,
-   [RFC7895], [RFC8526], [RFC9144], [RFC8639], [RFC8641], and [RFC8040],
-   use "anydata" in their definitions.  Current YANG implementations
-   accept syntactically valid YANG data nodes as children of an
-   "anydata" node but do not check the semantics of these data nodes
-   against a YANG schema.  This creates a real problem for any consumer
-   of these models when validating all leaves of the YANG data tree.
+   unknown set of YANG nodes for which the data model is not known at
+   module design time.  However, YANG [RFC7950] left the verification of
+   the "anydata" tree open to be done using external means.  Several
+   IETF models, e.g., [RFC7895], [RFC8526], [RFC9144], [RFC8639],
+   [RFC8641], and [RFC8040], use "anydata" in their definitions.
+   Current YANG implementations accept syntactically valid YANG data
+   nodes as children of an "anydata" node but do not check the semantics
+   of these data nodes against a YANG schema.  This creates a real
+   problem for any consumer of these models when validating all leaves
+   of the YANG data tree.
 
    YANG Schema Mount [RFC8528] allows mounting complete data models at
    implementation and run time.  While powerful, schema mount cannot
@@ -99,6 +100,20 @@ Table of Contents
    the YANG tooling to implement an optional flag that enables a a flag
    for validating "anydata" subtrees in the context of a YANG library.
 
+
+
+
+
+
+
+
+
+
+Elhassany               Expires 2 September 2024                [Page 2]
+
+Internet-Draft             Anydata validation                 March 2024
+
+
 1.1.  Requirements Language
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -106,13 +121,6 @@ Table of Contents
    "OPTIONAL" in this document are to be interpreted as described in BCP
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
-
-
-
-Elhassany               Expires 2 September 2024                [Page 2]
-
-Internet-Draft              Abbreviated Title                 March 2024
-
 
 2.  Terminology
 
@@ -148,27 +156,25 @@ Internet-Draft              Abbreviated Title                 March 2024
    anydata node (NodeA) is accepted to be valid only if (i) the
    qualified name of the node NodeB is found in one of the data trees
    defined by the YANG library AND (ii) the instantiated data tree
-   rooted by NodeB is valid incomplete instantiated tree according to
-   the data node of NodeB.
+   rooted by NodeB is valid incomplete instantiated data tree according
+   to the data node of NodeB.
 
    The first condition ensures the completeness of the YANG library, and
-   no subtree can be included as a child of any data node unless a
-   schema is defined for all the children of any data subtree and
-   specified in the YANG library.  The second condition applies a
-   regular YANG validation against the subtree of anydata, considering
-   that the subtree of anydata could be generated using an XPath
-   [RFC8641] or a subtree filter [RFC6241].  Thus, the validator MUST
-   consider this subtree incomplete and ignore any missing leaves.
-
-
-
+   no subtree can be included as a child of anydata node unless a schema
+   is defined for all the children of anydata subtree and specified in
 
 
 
 Elhassany               Expires 2 September 2024                [Page 3]
 
-Internet-Draft              Abbreviated Title                 March 2024
+Internet-Draft             Anydata validation                 March 2024
 
+
+   the YANG library.  The second condition applies a regular YANG
+   validation against the subtree of anydata, considering that the
+   subtree of anydata could be generated using an XPath [RFC8641] or a
+   subtree filter [RFC6241].  Thus, the validator MUST consider this
+   subtree incomplete and ignore any missing leaves.
 
 4.  IANA Considerations
 
@@ -212,19 +218,17 @@ Internet-Draft              Abbreviated Title                 March 2024
               (NMDA) Datastores", RFC 9144, DOI 10.17487/RFC9144,
               December 2021, <https://www.rfc-editor.org/info/rfc9144>.
 
-   [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
-              Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
-              <https://www.rfc-editor.org/info/rfc8040>.
-
-
-
 
 
 
 Elhassany               Expires 2 September 2024                [Page 4]
 
-Internet-Draft              Abbreviated Title                 March 2024
+Internet-Draft             Anydata validation                 March 2024
 
+
+   [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
+              Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
+              <https://www.rfc-editor.org/info/rfc8040>.
 
    [RFC8639]  Voit, E., Clemm, A., Gonzalez Prieto, A., Nilsen-Nygaard,
               E., and A. Tripathy, "Subscription to YANG Notifications",
@@ -264,10 +268,6 @@ Author's Address
    CH- Zuerich 8045
    Switzerland
    Email: ahmed.elhassany@swisscom.com
-
-
-
-
 
 
 
