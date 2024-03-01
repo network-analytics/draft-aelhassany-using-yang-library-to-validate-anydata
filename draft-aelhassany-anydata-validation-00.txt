@@ -4,12 +4,12 @@
 
 NETCONF                                                     A. Elhassany
 Internet-Draft                                                  Swisscom
-Intended status: Informational                              1 March 2024
+Intended status: Standards Track                            1 March 2024
 Expires: 2 September 2024
 
 
                Validating anydata in YANG Library context
-            draft-using-yang-library-to-validate-anydata-00
+                 draft-aelhassany-anydata-validation-00
 
 Abstract
 
@@ -55,7 +55,7 @@ Copyright Notice
 
 Elhassany               Expires 2 September 2024                [Page 1]
 
-Internet-Draft             Anydata validation                 March 2024
+Internet-Draft             anydata validation                 March 2024
 
 
 Table of Contents
@@ -111,7 +111,7 @@ Table of Contents
 
 Elhassany               Expires 2 September 2024                [Page 2]
 
-Internet-Draft             Anydata validation                 March 2024
+Internet-Draft             anydata validation                 March 2024
 
 
 1.1.  Requirements Language
@@ -167,7 +167,7 @@ Internet-Draft             Anydata validation                 March 2024
 
 Elhassany               Expires 2 September 2024                [Page 3]
 
-Internet-Draft             Anydata validation                 March 2024
+Internet-Draft             anydata validation                 March 2024
 
 
    the YANG library.  The second condition applies a regular YANG
@@ -193,19 +193,42 @@ Internet-Draft             Anydata validation                 March 2024
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
 
-   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+   [RFC7895]  Bierman, A., Bjorklund, M., and K. Watsen, "YANG Module
+              Library", RFC 7895, DOI 10.17487/RFC7895, June 2016,
+              <https://www.rfc-editor.org/info/rfc7895>.
 
    [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
               RFC 7950, DOI 10.17487/RFC7950, August 2016,
               <https://www.rfc-editor.org/info/rfc7950>.
 
-   [RFC7895]  Bierman, A., Bjorklund, M., and K. Watsen, "YANG Module
-              Library", RFC 7895, DOI 10.17487/RFC7895, June 2016,
-              <https://www.rfc-editor.org/info/rfc7895>.
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
 6.2.  Informative References
+
+   [I-D.jouqui-netmod-yang-full-include]
+              Joubert, T., Quilbeuf, J., and B. Claise, "YANG Full
+              Include", Work in Progress, Internet-Draft, draft-jouqui-
+              netmod-yang-full-include-00, 6 November 2023,
+              <https://datatracker.ietf.org/doc/html/draft-jouqui-
+              netmod-yang-full-include-00>.
+
+   [RFC6241]  Enns, R., Ed., Bjorklund, M., Ed., Schoenwaelder, J., Ed.,
+              and A. Bierman, Ed., "Network Configuration Protocol
+              (NETCONF)", RFC 6241, DOI 10.17487/RFC6241, June 2011,
+              <https://www.rfc-editor.org/info/rfc6241>.
+
+
+
+Elhassany               Expires 2 September 2024                [Page 4]
+
+Internet-Draft             anydata validation                 March 2024
+
+
+   [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
+              Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
+              <https://www.rfc-editor.org/info/rfc8040>.
 
    [RFC8526]  Bjorklund, M., Schoenwaelder, J., Shafer, P., Watsen, K.,
               and R. Wilton, "NETCONF Extensions to Support the Network
@@ -213,22 +236,9 @@ Internet-Draft             Anydata validation                 March 2024
               DOI 10.17487/RFC8526, March 2019,
               <https://www.rfc-editor.org/info/rfc8526>.
 
-   [RFC9144]  Clemm, A., Qu, Y., Tantsura, J., and A. Bierman,
-              "Comparison of Network Management Datastore Architecture
-              (NMDA) Datastores", RFC 9144, DOI 10.17487/RFC9144,
-              December 2021, <https://www.rfc-editor.org/info/rfc9144>.
-
-
-
-
-Elhassany               Expires 2 September 2024                [Page 4]
-
-Internet-Draft             Anydata validation                 March 2024
-
-
-   [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
-              Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
-              <https://www.rfc-editor.org/info/rfc8040>.
+   [RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
+              RFC 8528, DOI 10.17487/RFC8528, March 2019,
+              <https://www.rfc-editor.org/info/rfc8528>.
 
    [RFC8639]  Voit, E., Clemm, A., Gonzalez Prieto, A., Nilsen-Nygaard,
               E., and A. Tripathy, "Subscription to YANG Notifications",
@@ -239,21 +249,10 @@ Internet-Draft             Anydata validation                 March 2024
               for Datastore Updates", RFC 8641, DOI 10.17487/RFC8641,
               September 2019, <https://www.rfc-editor.org/info/rfc8641>.
 
-   [RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
-              RFC 8528, DOI 10.17487/RFC8528, March 2019,
-              <https://www.rfc-editor.org/info/rfc8528>.
-
-   [RFC6241]  Enns, R., Ed., Bjorklund, M., Ed., Schoenwaelder, J., Ed.,
-              and A. Bierman, Ed., "Network Configuration Protocol
-              (NETCONF)", RFC 6241, DOI 10.17487/RFC6241, June 2011,
-              <https://www.rfc-editor.org/info/rfc6241>.
-
-   [I-D.jouqui-netmod-yang-full-include]
-              Joubert, T., Quilbeuf, J., and B. Claise, "YANG Full
-              Include", Work in Progress, Internet-Draft, draft-jouqui-
-              netmod-yang-full-include-00, 6 November 2023,
-              <https://datatracker.ietf.org/doc/html/draft-jouqui-
-              netmod-yang-full-include-00>.
+   [RFC9144]  Clemm, A., Qu, Y., Tantsura, J., and A. Bierman,
+              "Comparison of Network Management Datastore Architecture
+              (NMDA) Datastores", RFC 9144, DOI 10.17487/RFC9144,
+              December 2021, <https://www.rfc-editor.org/info/rfc9144>.
 
 Acknowledgements
 
@@ -268,6 +267,7 @@ Author's Address
    CH- Zuerich 8045
    Switzerland
    Email: ahmed.elhassany@swisscom.com
+
 
 
 

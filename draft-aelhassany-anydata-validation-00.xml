@@ -6,17 +6,16 @@
 <!ENTITY nbhy "&#8209;">
 <!ENTITY wj "&#8288;">
 ]>
-<rfc category="info" docName="draft-using-yang-library-to-validate-anydata-00"
-     ipr="trust200902" obsoletes="" submissionType="IETF" updates=""
-     version="3" xml:lang="en" xmlns:xi="http://www.w3.org/2001/XInclude"
+<rfc category="std" consensus="true"
+     docName="draft-aelhassany-anydata-validation-00" ipr="trust200902"
+     obsoletes="" sortRefs="true" submissionType="IETF" symRefs="true"
+     tocInclude="true" updates="" version="3" xml:lang="en"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
      xmlns:ns2="http://www.w3.org/2000/svg"
      xmlns:ns="http://www.w3.org/1999/xlink">
   <front>
-    <title abbrev="Anydata validation">Validating anydata in YANG Library
+    <title abbrev="anydata validation">Validating anydata in YANG Library
     context</title>
-
-    <seriesInfo name="Internet-Draft"
-                value="draft-rfcxml-general-template-standard-00 [REPLACE]"/>
 
     <author fullname="Ahmed Elhassany" initials="A" surname="Elhassany">
       <organization>Swisscom</organization>
@@ -47,8 +46,6 @@
     <area>General</area>
 
     <workgroup>NETCONF</workgroup>
-
-    <keyword>keyword</keyword>
 
     <abstract>
       <t>This document describes a method to use yang-library to validate YANG
@@ -141,12 +138,12 @@
       node (NodeA) is accepted to be valid only if (i) the qualified name of
       the node NodeB is found in one of the data trees defined by the YANG
       library AND (ii) the instantiated data tree rooted by NodeB is valid
-      incomplete instantiated data tree according to the data node of NodeB.
-      </t>
+      incomplete instantiated data tree according to the data node of
+      NodeB.</t>
 
       <t>The first condition ensures the completeness of the YANG library, and
-      no subtree can be included as a child of anydata node unless a schema
-      is defined for all the children of anydata subtree and specified in the
+      no subtree can be included as a child of anydata node unless a schema is
+      defined for all the children of anydata subtree and specified in the
       YANG library. The second condition applies a regular YANG validation
       against the subtree of anydata, considering that the subtree of anydata
       could be generated using an XPath <xref target="RFC8641"/> or a subtree
