@@ -1,0 +1,11 @@
+ <push-update xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-push">
+     <id>1011</id>
+     <datastore-contents>
+        <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+         <interface1>
+           <name>eth0</name>
+           <oper-status>up</oper-status>
+         </interface1>
+       </interfaces>
+     </datastore-contents>
+   </push-update>
