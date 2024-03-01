@@ -24,13 +24,20 @@
       <address>
         <postal>
           <street>Binzring 17</street>
+
           <city>Zuerich 8045</city>
+
           <region/>
+
           <code/>
+
           <country>Switzerland</country>
         </postal>
+
         <phone/>
+
         <email>ahmed.elhassany@swisscom.com</email>
+
         <uri/>
       </address>
     </author>
@@ -66,11 +73,21 @@
       real problem for any consumer of these models when validating all leaves
       of the YANG data tree.</t>
 
+      <t><xref target="RFC8528">YANG Schema Mount</xref> allows mounting
+      complete data models at implementation and run time. While powerful,
+      schema mount cannot address use cases where the user selects an
+      arbitrary subset of an instantiated data tree, such as <xref
+      target="RFC8641">YANG PUSH</xref>. A current proposed approach, YANG
+      Full Include <xref target="I-D.jouqui-netmod-yang-full-include">YANG
+      Full Include</xref>, complements YANG Schema Mount and applies at design
+      time, yet cannot address dynamic filtering of an instantiated YANG data
+      tree.</t>
+
       <t>In this document we propese using <xref target="RFC7895">YANG
       Library</xref> to define the context in which anydata trees are
       validated. This would require the YANG tooling to implement an optional
-      flag that enables a strict mode validation for "anydata" in the context
-      of a YANG library.</t>
+      flag that enables a a flag for validating "anydata" subtrees in the
+      context of a YANG library.</t>
 
       <section>
         <name>Requirements Language</name>
@@ -118,13 +135,22 @@
       from a default namespace defined in the top data tree.</t>
 
       <t>This document introduces a new YANG validation option:
-      anydata-strict-mode. In this mode, a YANG data parser MUST accept a YANG
-      library as input along the YANG data file. When this option is enabled,
-      any instantiated data node (B) that is a child of anydata node (A) is
-      accepted to be valid only if the qualified name of the node A is found
-      in one of the data trees defined by the YANG library AND the
-      instantiated data tree rooted by A is valid according to the data node
-      of A.</t>
+      anydata-subtree-validation. In this mode, a YANG data parser MUST accept
+      a YANG library as input along the YANG data file. When this option is
+      enabled, any instantiated data node (NodeB) that is a child of anydata
+      node (NodeA) is accepted to be valid only if (i) the qualified name of
+      the node NodeB is found in one of the data trees defined by the YANG
+      library AND (ii) the instantiated data tree rooted by NodeB is valid
+      incomplete instantiated tree according to the data node of NodeB.</t>
+
+      <t>The first condition ensures the completeness of the YANG library, and
+      no subtree can be included as a child of any data node unless a schema
+      is defined for all the children of any data subtree and specified in the
+      YANG library. The second condition applies a regular YANG validation
+      against the subtree of anydata, considering that the subtree of anydata
+      could be generated using an XPath <xref target="RFC8641"/> or a subtree 
+      filter <xref target="RFC6241"/>. Thus, the validator MUST consider this 
+      subtree incomplete and ignore any missing leaves.</t>
     </section>
 
     <section anchor="IANA">
@@ -134,7 +160,6 @@
     </section>
 
     <section anchor="Security">
-  
       <name>Security Considerations</name>
 
       <t>TBD</t>
@@ -169,32 +194,20 @@
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8639.xml"/>
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8641.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8528.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6241.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.jouqui-netmod-yang-full-include.xml"/>
       </references>
     </references>
 
-    <section>
-      <name>Appendix 1 [REPLACE/DELETE]</name>
-
-      <t>This becomes an Appendix [REPLACE]</t>
-    </section>
-
     <section anchor="Acknowledgements" numbered="false">
-      <!-- [REPLACE/DELETE] an Acknowledgements section is optional -->
-
       <name>Acknowledgements</name>
 
-      <t>This template uses extracts from templates written by Pekka Savola,
-      Elwyn Davies and Henrik Levkowetz. [REPLACE]</t>
-    </section>
-
-    <section anchor="Contributors" numbered="false">
-      <!-- [REPLACE/DELETE] a Contributors section is optional -->
-
-      <name>Contributors</name>
-
-      <t>Thanks to all of the contributors. [REPLACE]</t>
-
-      <!-- [CHECK] it is optional to add a <contact> record for some or all contributors -->
+      <t>The authors would like to thank Jean Quilbeuf and Thomas Graf for
+      their review and valuable comments.</t>
     </section>
   </back>
 </rfc>

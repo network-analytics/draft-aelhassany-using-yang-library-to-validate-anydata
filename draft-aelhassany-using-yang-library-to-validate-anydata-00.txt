@@ -4,8 +4,8 @@
 
 NETCONF                                                     A. Elhassany
 Internet-Draft                                                  Swisscom
-Intended status: Informational                          29 February 2024
-Expires: 1 September 2024
+Intended status: Informational                              1 March 2024
+Expires: 2 September 2024
 
 
                Validating anydata in YANG Library context
@@ -31,7 +31,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 September 2024.
+   This Internet-Draft will expire on 2 September 2024.
 
 Copyright Notice
 
@@ -53,25 +53,23 @@ Copyright Notice
 
 
 
-Elhassany               Expires 1 September 2024                [Page 1]
+Elhassany               Expires 2 September 2024                [Page 1]
 
-Internet-Draft              Abbreviated Title              February 2024
+Internet-Draft              Abbreviated Title                 March 2024
 
 
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
      1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   2
-   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
    3.  Validating "anydata" Data Tree  . . . . . . . . . . . . . . .   3
-   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   3
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   3
-   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   3
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
      6.2.  Informative References  . . . . . . . . . . . . . . . . .   4
-   Appendix A.  Appendix 1 [REPLACE/DELETE]  . . . . . . . . . . . .   4
-   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   4
-   Contributors  . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   5
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   5
 
 1.  Introduction
@@ -87,10 +85,19 @@ Table of Contents
    against a YANG schema.  This creates a real problem for any consumer
    of these models when validating all leaves of the YANG data tree.
 
+   YANG Schema Mount [RFC8528] allows mounting complete data models at
+   implementation and run time.  While powerful, schema mount cannot
+   address use cases where the user selects an arbitrary subset of an
+   instantiated data tree, such as YANG PUSH [RFC8641].  A current
+   proposed approach, YANG Full Include YANG Full Include
+   [I-D.jouqui-netmod-yang-full-include], complements YANG Schema Mount
+   and applies at design time, yet cannot address dynamic filtering of
+   an instantiated YANG data tree.
+
    In this document we propese using YANG Library [RFC7895] to define
    the context in which anydata trees are validated.  This would require
-   the YANG tooling to implement an optional flag that enables a strict
-   mode validation for "anydata" in the context of a YANG library.
+   the YANG tooling to implement an optional flag that enables a a flag
+   for validating "anydata" subtrees in the context of a YANG library.
 
 1.1.  Requirements Language
 
@@ -100,19 +107,17 @@ Table of Contents
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
+
+
+Elhassany               Expires 2 September 2024                [Page 2]
+
+Internet-Draft              Abbreviated Title                 March 2024
+
+
 2.  Terminology
 
    We use the terminology defined in YANG [RFC7950] for schema node and
    schema tree but refine data node and data tree to be more precise.
-
-
-
-
-
-Elhassany               Expires 1 September 2024                [Page 2]
-
-Internet-Draft              Abbreviated Title              February 2024
-
 
    *  data node: A node in the schema tree that can be instantiated in a
       data tree.  One of container, leaf, leaf-list, list, anydata, and
@@ -137,13 +142,33 @@ Internet-Draft              Abbreviated Title              February 2024
    assumed from a default namespace defined in the top data tree.
 
    This document introduces a new YANG validation option: anydata-
-   strict-mode.  In this mode, a YANG data parser MUST accept a YANG
-   library as input along the YANG data file.  When this option is
-   enabled, any instantiated data node (B) that is a child of anydata
-   node (A) is accepted to be valid only if the qualified name of the
-   node A is found in one of the data trees defined by the YANG library
-   AND the instantiated data tree rooted by A is valid according to the
-   data node of A.
+   subtree-validation.  In this mode, a YANG data parser MUST accept a
+   YANG library as input along the YANG data file.  When this option is
+   enabled, any instantiated data node (NodeB) that is a child of
+   anydata node (NodeA) is accepted to be valid only if (i) the
+   qualified name of the node NodeB is found in one of the data trees
+   defined by the YANG library AND (ii) the instantiated data tree
+   rooted by NodeB is valid incomplete instantiated tree according to
+   the data node of NodeB.
+
+   The first condition ensures the completeness of the YANG library, and
+   no subtree can be included as a child of any data node unless a
+   schema is defined for all the children of any data subtree and
+   specified in the YANG library.  The second condition applies a
+   regular YANG validation against the subtree of anydata, considering
+   that the subtree of anydata could be generated using an XPath
+   [RFC8641] or a subtree filter [RFC6241].  Thus, the validator MUST
+   consider this subtree incomplete and ignore any missing leaves.
+
+
+
+
+
+
+Elhassany               Expires 2 September 2024                [Page 3]
+
+Internet-Draft              Abbreviated Title                 March 2024
+
 
 4.  IANA Considerations
 
@@ -161,14 +186,6 @@ Internet-Draft              Abbreviated Title              February 2024
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
-
-
-
-
-Elhassany               Expires 1 September 2024                [Page 3]
-
-Internet-Draft              Abbreviated Title              February 2024
-
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
@@ -199,6 +216,16 @@ Internet-Draft              Abbreviated Title              February 2024
               Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
               <https://www.rfc-editor.org/info/rfc8040>.
 
+
+
+
+
+
+Elhassany               Expires 2 September 2024                [Page 4]
+
+Internet-Draft              Abbreviated Title                 March 2024
+
+
    [RFC8639]  Voit, E., Clemm, A., Gonzalez Prieto, A., Nilsen-Nygaard,
               E., and A. Tripathy, "Subscription to YANG Notifications",
               RFC 8639, DOI 10.17487/RFC8639, September 2019,
@@ -208,27 +235,26 @@ Internet-Draft              Abbreviated Title              February 2024
               for Datastore Updates", RFC 8641, DOI 10.17487/RFC8641,
               September 2019, <https://www.rfc-editor.org/info/rfc8641>.
 
-Appendix A.  Appendix 1 [REPLACE/DELETE]
+   [RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
+              RFC 8528, DOI 10.17487/RFC8528, March 2019,
+              <https://www.rfc-editor.org/info/rfc8528>.
 
-   This becomes an Appendix [REPLACE]
+   [RFC6241]  Enns, R., Ed., Bjorklund, M., Ed., Schoenwaelder, J., Ed.,
+              and A. Bierman, Ed., "Network Configuration Protocol
+              (NETCONF)", RFC 6241, DOI 10.17487/RFC6241, June 2011,
+              <https://www.rfc-editor.org/info/rfc6241>.
+
+   [I-D.jouqui-netmod-yang-full-include]
+              Joubert, T., Quilbeuf, J., and B. Claise, "YANG Full
+              Include", Work in Progress, Internet-Draft, draft-jouqui-
+              netmod-yang-full-include-00, 6 November 2023,
+              <https://datatracker.ietf.org/doc/html/draft-jouqui-
+              netmod-yang-full-include-00>.
 
 Acknowledgements
 
-   This template uses extracts from templates written by Pekka Savola,
-   Elwyn Davies and Henrik Levkowetz.  [REPLACE]
-
-
-
-
-
-Elhassany               Expires 1 September 2024                [Page 4]
-
-Internet-Draft              Abbreviated Title              February 2024
-
-
-Contributors
-
-   Thanks to all of the contributors.  [REPLACE]
+   The authors would like to thank Jean Quilbeuf and Thomas Graf for
+   their review and valuable comments.
 
 Author's Address
 
@@ -251,30 +277,4 @@ Author's Address
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Elhassany               Expires 1 September 2024                [Page 5]
+Elhassany               Expires 2 September 2024                [Page 5]
