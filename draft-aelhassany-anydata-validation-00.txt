@@ -4,8 +4,8 @@
 
 NETCONF                                                     A. Elhassany
 Internet-Draft                                                  Swisscom
-Intended status: Standards Track                            1 March 2024
-Expires: 2 September 2024
+Intended status: Standards Track                            3 March 2024
+Expires: 4 September 2024
 
 
                Validating anydata in YANG Library context
@@ -31,7 +31,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 September 2024.
+   This Internet-Draft will expire on 4 September 2024.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Elhassany               Expires 2 September 2024                [Page 1]
+Elhassany               Expires 4 September 2024                [Page 1]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -78,13 +78,13 @@ Table of Contents
    unknown set of YANG nodes for which the data model is not known at
    module design time.  However, YANG [RFC7950] left the verification of
    the "anydata" tree open to be done using external means.  Several
-   IETF models, e.g., [RFC7895], [RFC8526], [RFC9144], [RFC8639],
-   [RFC8641], and [RFC8040], use "anydata" in their definitions.
-   Current YANG implementations accept syntactically valid YANG data
-   nodes as children of an "anydata" node but do not check the semantics
-   of these data nodes against a YANG schema.  This creates a real
-   problem for any consumer of these models when validating all leaves
-   of the YANG data tree.
+   IETF models, e.g., [RFC8526], [RFC9144], [RFC8639], [RFC8641], and
+   [RFC8040], use "anydata" in their definitions.  Current YANG
+   implementations accept syntactically valid YANG data nodes as
+   children of an "anydata" node but do not check the semantics of these
+   data nodes against a YANG schema.  This creates a real problem for
+   any consumer of these models when validating all leaves of the YANG
+   data tree.
 
    YANG Schema Mount [RFC8528] allows mounting complete data models at
    implementation and run time.  While powerful, schema mount cannot
@@ -95,10 +95,10 @@ Table of Contents
    and applies at design time, yet cannot address dynamic filtering of
    an instantiated YANG data tree.
 
-   In this document we propese using YANG Library [RFC7895] to define
-   the context in which anydata trees are validated.  This would require
-   the YANG tooling to implement an optional flag that enables a a flag
-   for validating "anydata" subtrees in the context of a YANG library.
+   This document propeses using YANG Library [RFC7895] to define the
+   context in which anydata trees are validated.  This would require the
+   YANG tooling to implement an optional flag that enables a flag for
+   validating "anydata" subtrees in the context of a YANG library.
 
 
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Elhassany               Expires 2 September 2024                [Page 2]
+Elhassany               Expires 4 September 2024                [Page 2]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -124,13 +124,14 @@ Internet-Draft             anydata validation                 March 2024
 
 2.  Terminology
 
-   We use the terminology defined in YANG [RFC7950] for schema node and
-   schema tree but refine data node and data tree to be more precise.
+   This document uses the terminology defined in YANG [RFC7950] for
+   schema node and schema tree but refine data node and data tree to be
+   more precise.
 
    *  data node: A node in the schema tree that can be instantiated in a
       data tree.  One of container, leaf, leaf-list, list, anydata, and
-      anyxml.  We do not discuss anyxml in this document, and this
-      document does not change how YANG handles anyxml data nodes.
+      anyxml.This document does not change how YANG handles anyxml data
+      nodes.
 
    *  instantiated data node: an instantiated instance of a data node
       that contains before fully qualified name (module namespace +
@@ -159,17 +160,19 @@ Internet-Draft             anydata validation                 March 2024
    rooted by NodeB is valid incomplete instantiated data tree according
    to the data node of NodeB.
 
-   The first condition ensures the completeness of the YANG library, and
-   no subtree can be included as a child of anydata node unless a schema
-   is defined for all the children of anydata subtree and specified in
 
 
 
-Elhassany               Expires 2 September 2024                [Page 3]
+
+
+Elhassany               Expires 4 September 2024                [Page 3]
 
 Internet-Draft             anydata validation                 March 2024
 
 
+   The first condition ensures the completeness of the YANG library, and
+   no subtree can be included as a child of anydata node unless a schema
+   is defined for all the children of anydata subtree and specified in
    the YANG library.  The second condition applies a regular YANG
    validation against the subtree of anydata, considering that the
    subtree of anydata could be generated using an XPath [RFC8641] or a
@@ -214,17 +217,19 @@ Internet-Draft             anydata validation                 March 2024
               <https://datatracker.ietf.org/doc/html/draft-jouqui-
               netmod-yang-full-include-00>.
 
+
+
+
+
+Elhassany               Expires 4 September 2024                [Page 4]
+
+Internet-Draft             anydata validation                 March 2024
+
+
    [RFC6241]  Enns, R., Ed., Bjorklund, M., Ed., Schoenwaelder, J., Ed.,
               and A. Bierman, Ed., "Network Configuration Protocol
               (NETCONF)", RFC 6241, DOI 10.17487/RFC6241, June 2011,
               <https://www.rfc-editor.org/info/rfc6241>.
-
-
-
-Elhassany               Expires 2 September 2024                [Page 4]
-
-Internet-Draft             anydata validation                 March 2024
-
 
    [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
               Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
@@ -256,8 +261,8 @@ Internet-Draft             anydata validation                 March 2024
 
 Acknowledgements
 
-   The authors would like to thank Jean Quilbeuf and Thomas Graf for
-   their review and valuable comments.
+   The authors would like to thank Jean Quilbeuf, Thomas Graf, and
+   Benoit Claise for their review and valuable comments.
 
 Author's Address
 
@@ -272,9 +277,4 @@ Author's Address
 
 
 
-
-
-
-
-
-Elhassany               Expires 2 September 2024                [Page 5]
+Elhassany               Expires 4 September 2024                [Page 5]
