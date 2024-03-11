@@ -80,7 +80,7 @@
       time, yet cannot address dynamic filtering of an instantiated YANG data
       tree.</t>
 
-      <t>This document propeses using the <xref target="RFC7895">YANG
+      <t>This document propeses using the <xref target="RFC8525">YANG
       Library</xref> to define the context in which anydata trees are
       validated. This would require the YANG tooling to implement an optional
       flag that enables a flag for validating "anydata" subtrees in the
@@ -177,7 +177,7 @@
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
 
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7895.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8525.xml"/>
       </references>
 
       <references>
