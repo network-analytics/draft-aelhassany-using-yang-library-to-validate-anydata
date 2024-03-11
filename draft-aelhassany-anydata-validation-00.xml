@@ -66,7 +66,7 @@
       target="RFC8641"/>, and <xref target="RFC8040"/>, use "anydata" in their
       definitions. Current YANG implementations accept syntactically valid
       YANG data nodes as children of an "anydata" node but do not check the
-      semantics of these data nodes against a YANG schema. This creates a real
+      data type of these data nodes against a YANG schema. This creates a real
       problem for any consumer of these models when validating all leaves of
       the YANG data tree.</t>
 
@@ -74,13 +74,13 @@
       complete data models at implementation and run time. While powerful,
       schema mount cannot address use cases where the user selects an
       arbitrary subset of an instantiated data tree, such as <xref
-      target="RFC8641">YANG PUSH</xref>. A current proposed approach, YANG
+      target="RFC8641">YANG-Push</xref>. A current proposed approach, YANG
       Full Include <xref target="I-D.jouqui-netmod-yang-full-include">YANG
       Full Include</xref>, complements YANG Schema Mount and applies at design
       time, yet cannot address dynamic filtering of an instantiated YANG data
       tree.</t>
 
-      <t>This document propeses using <xref target="RFC7895">YANG
+      <t>This document propeses using the <xref target="RFC7895">YANG
       Library</xref> to define the context in which anydata trees are
       validated. This would require the YANG tooling to implement an optional
       flag that enables a flag for validating "anydata" subtrees in the
