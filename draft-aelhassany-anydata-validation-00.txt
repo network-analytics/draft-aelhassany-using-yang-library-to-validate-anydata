@@ -4,8 +4,8 @@
 
 NETCONF                                                     A. Elhassany
 Internet-Draft                                                  Swisscom
-Intended status: Standards Track                           11 March 2024
-Expires: 12 September 2024
+Intended status: Standards Track                           12 March 2024
+Expires: 13 September 2024
 
 
                Validating anydata in YANG Library context
@@ -31,7 +31,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 September 2024.
+   This Internet-Draft will expire on 13 September 2024.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Elhassany               Expires 12 September 2024               [Page 1]
+Elhassany               Expires 13 September 2024               [Page 1]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -84,7 +84,9 @@ Table of Contents
    children of an "anydata" node but do not check the data type of these
    data nodes against a YANG schema.  This creates a real problem for
    any consumer of these models when validating all leaves of the YANG
-   data tree.
+   data tree.  For instance, a YANG-Push receiver described in
+   [I-D.netana-nmop-yang-kafka-integration] is not able to fully
+   validate the messages streamed by network nodes.
 
    YANG Schema Mount [RFC8528] allows mounting complete data models at
    implementation and run time.  While powerful, schema mount cannot
@@ -107,9 +109,7 @@ Table of Contents
 
 
 
-
-
-Elhassany               Expires 12 September 2024               [Page 2]
+Elhassany               Expires 13 September 2024               [Page 2]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -165,7 +165,7 @@ Internet-Draft             anydata validation                 March 2024
 
 
 
-Elhassany               Expires 12 September 2024               [Page 3]
+Elhassany               Expires 13 September 2024               [Page 3]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -221,10 +221,17 @@ Internet-Draft             anydata validation                 March 2024
 
 
 
-Elhassany               Expires 12 September 2024               [Page 4]
+Elhassany               Expires 13 September 2024               [Page 4]
 
 Internet-Draft             anydata validation                 March 2024
 
+
+   [I-D.netana-nmop-yang-kafka-integration]
+              Graf, T., "An Architecture for YANG-Push to Apache Kafka
+              Integration", Work in Progress, Internet-Draft, draft-
+              netana-nmop-yang-kafka-integration-00, 24 February 2024,
+              <https://datatracker.ietf.org/doc/html/draft-netana-nmop-
+              yang-kafka-integration-00>.
 
    [RFC6241]  Enns, R., Ed., Bjorklund, M., Ed., Schoenwaelder, J., Ed.,
               and A. Bierman, Ed., "Network Configuration Protocol
@@ -266,6 +273,15 @@ Acknowledgements
 
 Author's Address
 
+
+
+
+
+Elhassany               Expires 13 September 2024               [Page 5]
+
+Internet-Draft             anydata validation                 March 2024
+
+
    Ahmed Elhassany
    Swisscom
    Binzring 17
@@ -277,4 +293,44 @@ Author's Address
 
 
 
-Elhassany               Expires 12 September 2024               [Page 5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Elhassany               Expires 13 September 2024               [Page 6]

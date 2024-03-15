@@ -68,7 +68,9 @@
       YANG data nodes as children of an "anydata" node but do not check the
       data type of these data nodes against a YANG schema. This creates a real
       problem for any consumer of these models when validating all leaves of
-      the YANG data tree.</t>
+      the YANG data tree. For instance, a YANG-Push receiver described in
+      <xref target="I-D.netana-nmop-yang-kafka-integration"/> is not able to
+      fully validate the messages streamed by network nodes.</t>
 
       <t><xref target="RFC8528">YANG Schema Mount</xref> allows mounting
       complete data models at implementation and run time. While powerful,
@@ -198,6 +200,8 @@
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6241.xml"/>
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.jouqui-netmod-yang-full-include.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.netana-nmop-yang-kafka-integration.xml"/>
       </references>
     </references>
 
