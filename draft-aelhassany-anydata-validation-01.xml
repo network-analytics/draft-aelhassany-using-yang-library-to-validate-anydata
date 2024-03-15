@@ -48,8 +48,9 @@
     <workgroup>NETCONF</workgroup>
 
     <abstract>
-      <t>This document describes a method to use yang-library to validate YANG
-      data nodes with type anydata.</t>
+      <t>This document describes a method to use <xref target="RFC8525">YANG
+      Library</xref> to validate YANG data nodes that are children of an
+      "anydata" data node.</t>
     </abstract>
   </front>
 
@@ -61,30 +62,32 @@
       represent an unknown set of YANG nodes for which the data model is not
       known at module design time. However, <xref target="RFC7950">YANG</xref>
       left the verification of the "anydata" tree open to be done using
-      external means. Several IETF models, e.g., <xref target="RFC7895"/>,
-      <xref target="RFC8526"/>, <xref target="RFC9144"/>, <xref
-      target="RFC8639"/>, <xref target="RFC8641"/>, and <xref
-      target="RFC8040"/>, use "anydata" in their definitions. Current YANG
-      implementations accept syntactically valid YANG data nodes as children
-      of an "anydata" node but do not check the semantics of these data nodes
-      against a YANG schema. This creates a real problem for any consumer of
-      these models when validating all leaves of the YANG data tree.</t>
+      external means. Several IETF models, e.g., <xref target="RFC8526"/>,
+      <xref target="RFC9144"/>, <xref target="RFC8639"/>, <xref
+      target="RFC8641"/>, and <xref target="RFC8040"/>, use "anydata" in their
+      definitions. Current YANG implementations accept syntactically valid
+      YANG data nodes as children of an "anydata" node but do not check the
+      data type of these data nodes against a YANG schema. This creates a real
+      problem for any consumer of these models when validating all leaves of
+      the YANG data tree. For instance, a YANG-Push receiver described in
+      <xref target="I-D.netana-nmop-yang-kafka-integration"/> is not able to
+      fully validate the messages streamed by network nodes.</t>
 
       <t><xref target="RFC8528">YANG Schema Mount</xref> allows mounting
       complete data models at implementation and run time. While powerful,
       schema mount cannot address use cases where the user selects an
       arbitrary subset of an instantiated data tree, such as <xref
-      target="RFC8641">YANG PUSH</xref>. A current proposed approach, YANG
+      target="RFC8641">YANG-Push</xref>. A current proposed approach, YANG
       Full Include <xref target="I-D.jouqui-netmod-yang-full-include">YANG
       Full Include</xref>, complements YANG Schema Mount and applies at design
       time, yet cannot address dynamic filtering of an instantiated YANG data
       tree.</t>
 
-      <t>In this document we propese using <xref target="RFC7895">YANG
+      <t>This document propeses using the <xref target="RFC8525">YANG
       Library</xref> to define the context in which anydata trees are
       validated. This would require the YANG tooling to implement an optional
-      flag that enables a a flag for validating "anydata" subtrees in the
-      context of a YANG library.</t>
+      flag that enables a flag for validating "anydata" subtrees in the
+      context of a YANG Library.</t>
 
       <section>
         <name>Requirements Language</name>
@@ -100,15 +103,15 @@
     <section anchor="terminology" numbered="true" toc="include">
       <name slugifiedName="name-terminology">Terminology</name>
 
-      <t>We use the terminology defined in <xref target="RFC7950">YANG</xref>
-      for schema node and schema tree but refine data node and data tree to be
-      more precise.</t>
+      <t>This document uses the terminology defined in <xref
+      target="RFC7950">YANG</xref> for schema node and schema tree but refines
+      data node and data tree to be more precise.</t>
 
       <ul>
         <li>data node: A node in the schema tree that can be instantiated in a
         data tree. One of container, leaf, leaf-list, list, anydata, and
-        anyxml. We do not discuss anyxml in this document, and this document
-        does not change how YANG handles anyxml data nodes.</li>
+        anyxml. This document does not change how YANG handles anyxml data
+        nodes.</li>
 
         <li>instantiated data node: an instantiated instance of a data node
         that contains before fully qualified name (module namespace +
@@ -133,7 +136,7 @@
 
       <t>This document introduces a new YANG validation option:
       anydata-subtree-validation. In this mode, a YANG data parser MUST accept
-      a YANG library as input along the YANG data file. When this option is
+      a YANG Library as input along the YANG data file. When this option is
       enabled, any instantiated data node (NodeB) that is a child of anydata
       node (NodeA) is accepted to be valid only if (i) the qualified name of
       the node NodeB is found in one of the data trees defined by the YANG
@@ -141,10 +144,10 @@
       incomplete instantiated data tree according to the data node of
       NodeB.</t>
 
-      <t>The first condition ensures the completeness of the YANG library, and
+      <t>The first condition ensures the completeness of the YANG Library, and
       no subtree can be included as a child of anydata node unless a schema is
       defined for all the children of anydata subtree and specified in the
-      YANG library. The second condition applies a regular YANG validation
+      YANG Library. The second condition applies a regular YANG validation
       against the subtree of anydata, considering that the subtree of anydata
       could be generated using an XPath <xref target="RFC8641"/> or a subtree
       filter <xref target="RFC6241"/>. Thus, the validator MUST consider this
@@ -177,7 +180,7 @@
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
 
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7895.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8525.xml"/>
       </references>
 
       <references>
@@ -198,14 +201,16 @@
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6241.xml"/>
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.jouqui-netmod-yang-full-include.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.netana-nmop-yang-kafka-integration.xml"/>
       </references>
     </references>
 
     <section anchor="Acknowledgements" numbered="false">
       <name>Acknowledgements</name>
 
-      <t>The authors would like to thank Jean Quilbeuf and Thomas Graf for
-      their review and valuable comments.</t>
+      <t>The authors would like to thank Jean Quilbeuf, Thomas Graf, Benoit
+      Claise, and Alex Huang Feng for their review and valuable comments.</t>
     </section>
   </back>
 </rfc>
