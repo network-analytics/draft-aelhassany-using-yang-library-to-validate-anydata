@@ -4,8 +4,8 @@
 
 NETCONF                                                     A. Elhassany
 Internet-Draft                                                  Swisscom
-Intended status: Standards Track                           12 March 2024
-Expires: 13 September 2024
+Intended status: Standards Track                           15 March 2024
+Expires: 16 September 2024
 
 
                Validating anydata in YANG Library context
@@ -13,8 +13,8 @@ Expires: 13 September 2024
 
 Abstract
 
-   This document describes a method to use yang-library to validate YANG
-   data nodes with type anydata.
+   This document describes a method to use YANG Library [RFC8525] to
+   validate YANG data nodes that are children of an "anydata" data node.
 
 Status of This Memo
 
@@ -31,7 +31,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 September 2024.
+   This Internet-Draft will expire on 16 September 2024.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Elhassany               Expires 13 September 2024               [Page 1]
+Elhassany               Expires 16 September 2024               [Page 1]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -100,7 +100,7 @@ Table of Contents
    This document propeses using the YANG Library [RFC8525] to define the
    context in which anydata trees are validated.  This would require the
    YANG tooling to implement an optional flag that enables a flag for
-   validating "anydata" subtrees in the context of a YANG library.
+   validating "anydata" subtrees in the context of a YANG Library.
 
 
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Elhassany               Expires 13 September 2024               [Page 2]
+Elhassany               Expires 16 September 2024               [Page 2]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -125,7 +125,7 @@ Internet-Draft             anydata validation                 March 2024
 2.  Terminology
 
    This document uses the terminology defined in YANG [RFC7950] for
-   schema node and schema tree but refine data node and data tree to be
+   schema node and schema tree but refines data node and data tree to be
    more precise.
 
    *  data node: A node in the schema tree that can be instantiated in a
@@ -152,7 +152,7 @@ Internet-Draft             anydata validation                 March 2024
 
    This document introduces a new YANG validation option: anydata-
    subtree-validation.  In this mode, a YANG data parser MUST accept a
-   YANG library as input along the YANG data file.  When this option is
+   YANG Library as input along the YANG data file.  When this option is
    enabled, any instantiated data node (NodeB) that is a child of
    anydata node (NodeA) is accepted to be valid only if (i) the
    qualified name of the node NodeB is found in one of the data trees
@@ -165,15 +165,15 @@ Internet-Draft             anydata validation                 March 2024
 
 
 
-Elhassany               Expires 13 September 2024               [Page 3]
+Elhassany               Expires 16 September 2024               [Page 3]
 
 Internet-Draft             anydata validation                 March 2024
 
 
-   The first condition ensures the completeness of the YANG library, and
+   The first condition ensures the completeness of the YANG Library, and
    no subtree can be included as a child of anydata node unless a schema
    is defined for all the children of anydata subtree and specified in
-   the YANG library.  The second condition applies a regular YANG
+   the YANG Library.  The second condition applies a regular YANG
    validation against the subtree of anydata, considering that the
    subtree of anydata could be generated using an XPath [RFC8641] or a
    subtree filter [RFC6241].  Thus, the validator MUST consider this
@@ -212,16 +212,16 @@ Internet-Draft             anydata validation                 March 2024
 6.2.  Informative References
 
    [I-D.jouqui-netmod-yang-full-include]
-              Joubert, T., Quilbeuf, J., and B. Claise, "YANG Full
-              Include", Work in Progress, Internet-Draft, draft-jouqui-
-              netmod-yang-full-include-00, 6 November 2023,
+              Quilbeuf, J., Claise, B., and T. Joubert, "YANG Full
+              Embed", Work in Progress, Internet-Draft, draft-jouqui-
+              netmod-yang-full-include-01, 4 March 2024,
               <https://datatracker.ietf.org/doc/html/draft-jouqui-
-              netmod-yang-full-include-00>.
+              netmod-yang-full-include-01>.
 
 
 
 
-Elhassany               Expires 13 September 2024               [Page 4]
+Elhassany               Expires 16 September 2024               [Page 4]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -268,8 +268,8 @@ Internet-Draft             anydata validation                 March 2024
 
 Acknowledgements
 
-   The authors would like to thank Jean Quilbeuf, Thomas Graf, and
-   Benoit Claise for their review and valuable comments.
+   The authors would like to thank Jean Quilbeuf, Thomas Graf, Benoit
+   Claise, and Alex Huang Feng for their review and valuable comments.
 
 Author's Address
 
@@ -277,7 +277,7 @@ Author's Address
 
 
 
-Elhassany               Expires 13 September 2024               [Page 5]
+Elhassany               Expires 16 September 2024               [Page 5]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -333,4 +333,4 @@ Internet-Draft             anydata validation                 March 2024
 
 
 
-Elhassany               Expires 13 September 2024               [Page 6]
+Elhassany               Expires 16 September 2024               [Page 6]
