@@ -4,12 +4,12 @@
 
 NETCONF                                                     A. Elhassany
 Internet-Draft                                                  Swisscom
-Intended status: Standards Track                           15 March 2024
-Expires: 16 September 2024
+Intended status: Standards Track                           17 March 2024
+Expires: 18 September 2024
 
 
                Validating anydata in YANG Library context
-                 draft-aelhassany-anydata-validation-00
+                 draft-aelhassany-anydata-validation-01
 
 Abstract
 
@@ -31,7 +31,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 September 2024.
+   This Internet-Draft will expire on 18 September 2024.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Elhassany               Expires 16 September 2024               [Page 1]
+Elhassany               Expires 18 September 2024               [Page 1]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Elhassany               Expires 16 September 2024               [Page 2]
+Elhassany               Expires 18 September 2024               [Page 2]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -130,8 +130,8 @@ Internet-Draft             anydata validation                 March 2024
 
    *  data node: A node in the schema tree that can be instantiated in a
       data tree.  One of container, leaf, leaf-list, list, anydata, and
-      anyxml.This document does not change how YANG handles anyxml data
-      nodes.
+      anyxml.  This document does not change how YANG handles anyxml
+      data nodes.
 
    *  instantiated data node: an instantiated instance of a data node
       that contains before fully qualified name (module namespace +
@@ -165,7 +165,7 @@ Internet-Draft             anydata validation                 March 2024
 
 
 
-Elhassany               Expires 16 September 2024               [Page 3]
+Elhassany               Expires 18 September 2024               [Page 3]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -221,7 +221,7 @@ Internet-Draft             anydata validation                 March 2024
 
 
 
-Elhassany               Expires 16 September 2024               [Page 4]
+Elhassany               Expires 18 September 2024               [Page 4]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -277,7 +277,7 @@ Author's Address
 
 
 
-Elhassany               Expires 16 September 2024               [Page 5]
+Elhassany               Expires 18 September 2024               [Page 5]
 
 Internet-Draft             anydata validation                 March 2024
 
@@ -333,4 +333,4 @@ Internet-Draft             anydata validation                 March 2024
 
 
 
-Elhassany               Expires 16 September 2024               [Page 6]
+Elhassany               Expires 18 September 2024               [Page 6]
