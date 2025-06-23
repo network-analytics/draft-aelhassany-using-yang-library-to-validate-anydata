@@ -3,9 +3,9 @@
 
 
 NETMOD                                                      A. Elhassany
-Internet-Draft                                                  Swisscom
-Intended status: Standards Track                            21 June 2025
-Expires: 23 December 2025
+Internet-Draft                                                   T. Graf
+Intended status: Standards Track                                Swisscom
+Expires: 25 December 2025                                   23 June 2025
 
 
                Validating anydata in YANG Library context
@@ -32,7 +32,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 December 2025.
+   This Internet-Draft will expire on 25 December 2025.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Elhassany               Expires 23 December 2025                [Page 1]
+Elhassany & Graf        Expires 25 December 2025                [Page 1]
 
 Internet-Draft             anydata validation                  June 2025
 
@@ -72,36 +72,36 @@ Table of Contents
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
      8.2.  Informative References  . . . . . . . . . . . . . . . . .   5
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   6
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
 1.  Introduction
 
-   YANG [RFC7950] defines the "anydata" statement to represent an
-   unknown set of YANG nodes for which the data model is not known at
-   module design time.  However, YANG [RFC7950] left the verification of
-   the "anydata" tree open to be done using external means.  Several
-   IETF models, e.g., [RFC8526], [RFC9144], [RFC8639], [RFC8641], and
-   [RFC8040], use "anydata" in their definitions.  Current YANG
-   implementations accept syntactically valid YANG data nodes as
-   children of an "anydata" node but do not check the data type of these
-   data nodes against a YANG schema.  This creates a real problem for
-   any consumer of these models when validating all leaves of the YANG
-   data tree.  For instance, a YANG-Push receiver described in
+   Section 7.10 of [RFC7950] defines the "anydata" statement to
+   represent an unknown set of YANG nodes for which the data model is
+   not known at module design time.  However, Section 7.10 of [RFC7950]
+   left the verification of the "anydata" tree open to become known
+   through protocol signaling or other means.  Several IETF models,
+   e.g., [RFC8526], [RFC9144], [RFC8639], [RFC8641], and [RFC8040], use
+   "anydata" in their definitions.  Current YANG implementations accept
+   syntactically valid YANG data nodes as children of an "anydata" node
+   but do not check the data type of these data nodes against a YANG
+   schema.  This creates a real problem for any YANG data consumer when
+   validating YANG data against YANG data tree.  For instance, a YANG
+   Message Broker Consumer described in Section 4.6 of
    [I-D.ietf-nmop-yang-message-broker-integration] is not able to fully
-   validate the messages streamed by network nodes.
+   validate the received messages published by the network nodes.
 
    YANG Schema Mount [RFC8528] allows mounting complete data models at
    implementation and run time.  While powerful, schema mount cannot
    address use cases where the user selects an arbitrary subset of an
-   instantiated data tree, such as YANG-Push [RFC8641].  A current
-   proposed approach, YANG Full Include YANG Full Include
-   [I-D.jouqui-netmod-yang-full-include], complements YANG Schema Mount
-   and applies at design time, yet cannot address dynamic filtering of
-   an instantiated YANG data tree.
+   instantiated data tree, such as [RFC8641].  A current proposed
+   approach, YANG Full Include [I-D.jouqui-netmod-yang-full-include],
+   complements YANG Schema Mount and applies at design time, yet cannot
+   address dynamic filtering of an instantiated YANG data tree.
 
-   This document propeses using the YANG Library [RFC8525] to define the
-   context in which anydata trees are validated.  This would require the
-   YANG tooling to implement additional flags that enables validating
+   This document propeses using the [RFC8525] to define the context in
+   which anydata trees are validated.  This would require the YANG
+   tooling to implement additional flags that enables validating
    "anydata" subtrees in the context of a YANG Library.
 
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Elhassany               Expires 23 December 2025                [Page 2]
+Elhassany & Graf        Expires 25 December 2025                [Page 2]
 
 Internet-Draft             anydata validation                  June 2025
 
@@ -137,9 +137,9 @@ Internet-Draft             anydata validation                  June 2025
       that contains before fully qualified name (module namespace +
       identifier) for the data node and the data modeled within YANG.
 
-   *  instantiated data tree: is what YANG [RFC7950] defines as "data
-      tree".  Adding the term "instantiated" precisely indicates that
-      this tree is an instance of specific data modeled with YANG.
+   *  instantiated data tree: is what [RFC7950] defines as "data tree".
+      Adding the term "instantiated" precisely indicates that this tree
+      is an instance of specific data modeled with YANG.
 
    *  data tree: a tree of data nodes (with no values).
 
@@ -165,7 +165,7 @@ Internet-Draft             anydata validation                  June 2025
 
 
 
-Elhassany               Expires 23 December 2025                [Page 3]
+Elhassany & Graf        Expires 25 December 2025                [Page 3]
 
 Internet-Draft             anydata validation                  June 2025
 
@@ -187,8 +187,8 @@ Internet-Draft             anydata validation                  June 2025
    complete and anydata-candidate.  These two options align with
    Section 8.3.3 of [RFC7950], such that the complete validation
    validates the contents of the anydata subtree, which MUST obey all
-   validation rules defined in the corresponding schema in the yang-
-   library.  The candidate does not apply the constraint checks.
+   validation rules defined in the corresponding schema in the YANG
+   Library.  The candidate does not apply the constraint checks.
 
 5.  Implementation Status
 
@@ -221,7 +221,7 @@ Internet-Draft             anydata validation                  June 2025
 
 
 
-Elhassany               Expires 23 December 2025                [Page 4]
+Elhassany & Graf        Expires 25 December 2025                [Page 4]
 
 Internet-Draft             anydata validation                  June 2025
 
@@ -277,7 +277,7 @@ Internet-Draft             anydata validation                  June 2025
 
 
 
-Elhassany               Expires 23 December 2025                [Page 5]
+Elhassany & Graf        Expires 25 December 2025                [Page 5]
 
 Internet-Draft             anydata validation                  June 2025
 
@@ -302,10 +302,10 @@ Internet-Draft             anydata validation                  June 2025
 
 Acknowledgements
 
-   The authors would like to thank Jean Quilbeuf, Thomas Graf, Benoit
-   Claise, and Alex Huang Feng for their review and valuable comments.
+   The authors would like to thank Jean Quilbeuf, Benoit Claise, and
+   Alex Huang Feng for their review and valuable comments.
 
-Author's Address
+Authors' Addresses
 
    Ahmed Elhassany
    Swisscom
@@ -315,6 +315,12 @@ Author's Address
    Email: ahmed.elhassany@swisscom.com
 
 
+   Thomas Graf
+   Swisscom
+   Binzring 17
+   CH-8045 Zurich
+   Switzerland
+   Email: thomas.graf@swisscom.com
 
 
 
@@ -327,10 +333,4 @@ Author's Address
 
 
 
-
-
-
-
-
-
-Elhassany               Expires 23 December 2025                [Page 6]
+Elhassany & Graf        Expires 25 December 2025                [Page 6]
