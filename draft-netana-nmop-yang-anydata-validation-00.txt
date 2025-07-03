@@ -5,7 +5,7 @@
 NMOP                                                        A. Elhassany
 Internet-Draft                                                   T. Graf
 Intended status: Standards Track                                Swisscom
-Expires: 26 December 2025                                   24 June 2025
+Expires: 4 January 2026                                      3 July 2025
 
 
                Validating anydata in YANG Library context
@@ -32,7 +32,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 December 2025.
+   This Internet-Draft will expire on 4 January 2026.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Elhassany & Graf        Expires 26 December 2025                [Page 1]
+Elhassany & Graf         Expires 4 January 2026                 [Page 1]
 
-Internet-Draft             anydata validation                  June 2025
+Internet-Draft             anydata validation                  July 2025
 
 
 Table of Contents
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Elhassany & Graf        Expires 26 December 2025                [Page 2]
+Elhassany & Graf         Expires 4 January 2026                 [Page 2]
 
-Internet-Draft             anydata validation                  June 2025
+Internet-Draft             anydata validation                  July 2025
 
 
 1.1.  Requirements Language
@@ -165,9 +165,9 @@ Internet-Draft             anydata validation                  June 2025
 
 
 
-Elhassany & Graf        Expires 26 December 2025                [Page 3]
+Elhassany & Graf         Expires 4 January 2026                 [Page 3]
 
-Internet-Draft             anydata validation                  June 2025
+Internet-Draft             anydata validation                  July 2025
 
 
    *  In CBOR [RFC9254] encoding, node should include information that
@@ -221,9 +221,9 @@ Internet-Draft             anydata validation                  June 2025
 
 
 
-Elhassany & Graf        Expires 26 December 2025                [Page 4]
+Elhassany & Graf         Expires 4 January 2026                 [Page 4]
 
-Internet-Draft             anydata validation                  June 2025
+Internet-Draft             anydata validation                  July 2025
 
 
    [RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
@@ -277,9 +277,9 @@ Internet-Draft             anydata validation                  June 2025
 
 
 
-Elhassany & Graf        Expires 26 December 2025                [Page 5]
+Elhassany & Graf         Expires 4 January 2026                 [Page 5]
 
-Internet-Draft             anydata validation                  June 2025
+Internet-Draft             anydata validation                  July 2025
 
 
    [RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
@@ -310,7 +310,7 @@ Authors' Addresses
    Ahmed Elhassany
    Swisscom
    Binzring 17
-   CH- Zuerich 8045
+   CH- Zurich 8045
    Switzerland
    Email: ahmed.elhassany@swisscom.com
 
@@ -333,4 +333,4 @@ Authors' Addresses
 
 
 
-Elhassany & Graf        Expires 26 December 2025                [Page 6]
+Elhassany & Graf         Expires 4 January 2026                 [Page 6]

@@ -24,7 +24,7 @@
         <postal>
           <street>Binzring 17</street>
 
-          <city>Zuerich 8045</city>
+          <city>Zurich 8045</city>
 
           <region/>
 
@@ -59,7 +59,7 @@
       </address>
     </author>
 
-    <date day="24" month="June" year="2025"/>
+    <date day="03" month="July" year="2025"/>
 
     <area>General</area>
 
@@ -97,7 +97,7 @@
       network nodes.</t>
 
       <t><xref target="RFC8528">YANG Schema Mount</xref> allows mounting
-      complete data models at implementation and run time. While 
+      complete data models at implementation and run time. While
       powerful, schema mount cannot address use cases where the user
       selects an arbitrary subset of an instantiated data tree, such as
       <xref target="RFC8641"/>. A current proposed approach, YANG Full
@@ -191,7 +191,7 @@
 
       <t>
       This document introduces two new YANG validation options:
-      anydata-complete and anydata-candidate. These two options align 
+      anydata-complete and anydata-candidate. These two options align
       with <xref section="8.3.3" target="RFC7950"/>, such that the
       complete validation validates the contents of the anydata subtree,
       which MUST obey all validation rules defined in the corresponding
@@ -205,7 +205,7 @@
       publishing.</t>
 
     <t>anydata-candidate validation is implemented for libyang and
-    avaiable at 
+    avaiable at
     <eref target="https://github.com/ahassany/libyang/tree/anydata-strict-parsing"/>
     </t>
     </section>
