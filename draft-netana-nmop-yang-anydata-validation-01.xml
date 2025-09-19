@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="rfc7991bis.rnc"?>
+<!DOCTYPE rfc [
+<!ENTITY nbsp "&#160;">
+<!ENTITY zwsp "&#8203;">
+<!ENTITY nbhy "&#8209;">
+<!ENTITY wj "&#8288;">
+]>
+<rfc category="std" consensus="true"
+     docName="draft-netana-nmop-yang-anydata-validation-01" ipr="trust200902"
+     obsoletes="" sortRefs="true" submissionType="IETF" symRefs="true"
+     tocInclude="true" updates="" version="3" xml:lang="en"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     xmlns:ns2="http://www.w3.org/2000/svg"
+     xmlns:ns="http://www.w3.org/1999/xlink">
+  <front>
+    <title abbrev="anydata validation">Validating anydata in YANG Library
+    context</title>
+
+    <author fullname="Ahmed Elhassany" initials="A" surname="Elhassany">
+      <organization>Swisscom</organization>
+
+      <address>
+        <postal>
+          <street>Binzring 17</street>
+
+          <city>Zurich 8045</city>
+
+          <region/>
+
+          <code/>
+
+          <country>Switzerland</country>
+        </postal>
+
+        <phone/>
+
+        <email>ahmed.elhassany@swisscom.com</email>
+
+        <uri/>
+      </address>
+    </author>
+
+    <author fullname="Thomas Graf" initials="T" surname="Graf">
+      <organization>Swisscom</organization>
+
+      <address>
+        <postal>
+          <street>Binzring 17</street>
+
+          <city>Zurich</city>
+
+          <code>8045</code>
+
+          <country>Switzerland</country>
+        </postal>
+
+        <email>thomas.graf@swisscom.com</email>
+      </address>
+    </author>
+
+    <date day="19" month="September" year="2025"/>
+
+    <area>General</area>
+
+    <workgroup>NMOP</workgroup>
+
+    <abstract>
+      <t>This document describes a method to use YANG RFC 8525 and standard
+      YANG validation rules in RFC 7950 to validate YANG data nodes that are
+      children of an "anydata" data node.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section>
+      <name>Introduction</name>
+
+      <t><xref section="7.10" target="RFC7950"/> defines the "anydata"
+      statement to represent an unknown set of YANG nodes for which the data
+      model is not known at module design time. However, <xref section="7.10"
+      target="RFC7950"/> left the verification of the "anydata" tree open to
+      become known through protocol signaling or other means. Several IETF
+      models, e.g., <xref target="RFC8526">NETCONF Extensions for the
+      NMDA</xref>, <xref target="RFC9144">NMDA Datastores</xref>, <xref
+      target="RFC8639">Subscribed Notifications</xref>, <xref
+      target="RFC8641">YANG-Push</xref>, and <xref
+      target="RFC8040">RESTCONT</xref>, use "anydata" in their definitions.
+      Current YANG implementations accept syntactically valid YANG data nodes
+      as children of an "anydata" node but do not check the data type of these
+      data nodes against a YANG schema.</t>
+
+      <t>The unvalidated "anydata" subtrees could create real problems for
+      large-scale production environments where a consumer of YANG data
+      messages expects the data to conform to a specific scheme but is unable
+      to verify it. For example, assume a network analytics platform that uses
+      <xref target="RFC8641">YANG-Push</xref> to collect the interface octet
+      counter <xref target="RFC8343">YANG Interface Management</xref> from
+      thousands of network nodes and compute the total traffic volume across
+      the network. Suppose one of the nodes is buggy and sends a message with
+      a large negative value for the interface octets counter. In that case,
+      the consumer without the ability to validate the "anydata" subtree will
+      not be able to detect the error and will compute an incorrect total
+      traffic volume, which could lead to inaccurate billing or capacity
+      planning decisions. Without a way to validate the "anydata" subtree, the
+      consumer is vulnerable to such errors, and troubleshooting such issues
+      can be challenging and time-consuming.</t>
+
+      <t><xref target="RFC8528">YANG Schema Mount</xref> allows mounting
+      complete data models at implementation and run time. While powerful,
+      schema mount cannot address use cases where the user selects an
+      arbitrary subset of an instantiated data tree, such as <xref
+      target="RFC8641"/>. A current proposed approach, YANG Full Include <xref
+      target="I-D.jouqui-netmod-yang-full-include"/>, complements YANG Schema
+      Mount and applies at design time, yet cannot address dynamic filtering
+      of an instantiated YANG data tree.</t>
+
+      <t>This document propeses using the <xref target="RFC8525"/> to define
+      the context in which anydata trees are validated. This would require the
+      YANG tooling to implement additional flags that enables validating
+      "anydata" subtrees in the context of a YANG Library.</t>
+
+      <t>The validation of "anydata" subtrees is optional and allows a
+      consumer of YANG messages to decide on how to process messages with
+      "anydata" subtrees that do not conform to the expected schema. For
+      instance, a consumer might choose to ignore non-conforming messages, log
+      them for further analysis, or trigger an alert to notify administrators
+      of potential issues. This allows the consumer to avoid catastrophic
+      errors in large-scale production environments</t>
+
+      <section>
+        <name>Requirements Language</name>
+
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+        "OPTIONAL" in this document are to be interpreted as described in BCP
+        14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only
+        when, they appear in all capitals, as shown here.</t>
+      </section>
+    </section>
+
+    <section anchor="terminology" numbered="true" toc="include">
+      <name slugifiedName="name-terminology">Terminology</name>
+
+      <t>This document uses the terminology defined in <xref
+      target="RFC7950">YANG</xref> for schema node and schema tree but refines
+      data node and data tree to be more precise.</t>
+
+      <ul>
+        <li>data node: A node in the schema tree that can be instantiated in a
+        data tree. One of container, leaf, leaf-list, list, anydata, and
+        anyxml. This document does not change how YANG handles anyxml data
+        nodes.</li>
+
+        <li>instantiated data node: an instantiated instance of a data node
+        that contains before fully qualified name (module namespace +
+        identifier) for the data node and the data modeled within YANG.</li>
+
+        <li>data tree: a tree of data nodes (with no values).</li>
+
+        <li>datastore: defined in <xref target="RFC7950">YANG</xref> and
+        refined in <xref target="RFC8342">Network Management Datastore
+        Architecture (NMDA)</xref> is realized as an instantiated data
+        tree.</li>
+      </ul>
+    </section>
+
+    <section>
+      <name>Survey of existing use of "anydata"</name>
+
+      <t>Several IETF models use "anydata" in their definitions. The various
+      IETF documents so far have used anydata to either operate on a datastore
+      or to represent undefined YANG-like data.</t>
+
+      <section>
+        <name>Documents that use "anydata" to operate on a datastore</name>
+
+        <t>Documents are using "anydata" for one or more of the following four
+        use-cases:</t>
+
+        <ol>
+          <li>To represent a subtree filter <xref
+          target="RFC6241">NETCONF</xref> for selecting an instantiated YANG
+          data subtree from a given datastore <xref target="RFC8526">NETCONF
+          Extensions for the NMDA</xref>, <xref target="RFC9144">NMDA
+          Datastores</xref>, and <xref target="RFC8641">YANG-Push</xref>.</li>
+
+          <li>To represent the output of either a subtree filter or XPATH
+          query on a datastore <xref target="RFC8526">NETCONF Extensions for
+          the NMDA</xref>, <xref target="RFC9144">NMDA Datastores</xref>, and
+          <xref target="RFC8641">YANG-Push</xref>.</li>
+
+          <li>To represent edit operations on an instantiated YANG data tree
+          <xref target="RFC8072">YANG Patch</xref> and <xref
+          target="RFC9144">NMDA Datastores</xref>.</li>
+
+          <li>To store an instance of a YANG data tree <xref
+          target="RFC9195">YANG Instance Data</xref>.</li>
+        </ol>
+      </section>
+
+      <section>
+        <name>To operate on YANG-like data</name>
+
+        <t>There are currently only two documents that are using "anydata" to
+        represent undefined YANG-like data. The first one is <xref
+        target="RFC8639">Subscribed Notifications</xref>, which uses "anydata"
+        to encode a filter on the stream of events without defining the source
+        of these events. The second one is <xref
+        target="RFC8040">RESTCONF</xref> to convey error information in the
+        response body without defining the structure of this information.</t>
+      </section>
+    </section>
+
+    <section>
+      <name>Instantiated data node schema lookup</name>
+
+      <t>This document builds on the fact that when a YANG validator examines
+      a node in an instantiated data tree, it can find the corresponding data
+      node in a YANG schema. For the existing YANG encodings, the following
+      rules are defined to encode instantiated data nodes:</t>
+
+      <ul>
+        <li><xref target="RFC7950">In YANG XML encoding</xref>, The element's
+        local name is the data node identifier, and its namespace is the
+        module's XML namespace.</li>
+
+        <li><xref target="RFC7951">In JSON encoding</xref>, each object member
+        must be identical to the corresponding YANG data node identifier or
+        namespace-qualified - the data node identifier is prefixed with the
+        name of the module in which the data node is defined, separated from
+        the data node identifier by the colon character (":").</li>
+
+        <li><xref target="RFC9254">In CBOR</xref> encoding, node
+        should include information that would allow each node to be -
+        identified in a stateless way, for instance, the SID number associated
+        with the node, the SID delta from another SID in the application
+        payload, the namespace-qualified name, or the
+        instance-identifier.</li>
+      </ul>
+
+      <t>Given the encoding rules that maintain complete information to
+      identify the corresponding data node for each instantiated data node,
+      the YANG validator can easily find the schema for the data node in the
+      YANG Library.</t>
+    </section>
+
+    <section>
+      <name>Validating "anydata" Data Tree</name>
+
+      <t>This document introduces two new YANG validation options:
+      anydata-complete and anydata-candidate. These two options align with
+      <xref section="8.3.3" target="RFC7950"/>, such that the complete
+      validation validates the contents of the anydata subtree, which MUST
+      obey all validation rules defined in the corresponding schema in the
+      YANG Library. The candidate does not apply the constraint checks.</t>
+    </section>
+
+    <section anchor="Implementation" title="Implementation Status">
+      <t>Note to the RFC-Editor: Please remove this section before
+      publishing.</t>
+
+      <t>anydata-candidate validation is implemented for libyang and avaiable
+      at <eref
+      target="https://github.com/ahassany/libyang/tree/anydata-strict-parsing"/></t>
+    </section>
+
+    <section anchor="IANA">
+      <name>IANA Considerations</name>
+
+      <t>This memo includes no request to IANA.</t>
+    </section>
+
+    <section anchor="Security">
+      <name>Security Considerations</name>
+
+      <t>TBD</t>
+    </section>
+  </middle>
+
+  <back>
+    <references>
+      <name>References</name>
+
+      <references>
+        <name>Normative References</name>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7951.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8342.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8525.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9254.xml"/>
+      </references>
+
+      <references>
+        <name>Informative References</name>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8343.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6241.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8072.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9195.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8532.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8526.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9144.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8040.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8639.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8641.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8528.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.jouqui-netmod-yang-full-include.xml"/>
+
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-nmop-yang-message-broker-integration.xml"/>
+      </references>
+    </references>
+
+    <section anchor="Acknowledgements" numbered="false">
+      <name>Acknowledgements</name>
+
+      <t>The authors would like to thank Jean Quilbeuf, Benoit Claise, and
+      Alex Huang Feng for their review and valuable comments.</t>
+    </section>
+  </back>
+</rfc>
