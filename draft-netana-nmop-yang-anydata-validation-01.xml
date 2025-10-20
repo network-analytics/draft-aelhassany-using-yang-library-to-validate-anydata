@@ -59,7 +59,7 @@
       </address>
     </author>
 
-    <date day="19" month="September" year="2025"/>
+    <date day="20" month="October" year="2025"/>
 
     <area>General</area>
 
@@ -90,21 +90,22 @@
       as children of an "anydata" node but do not check the data type of these
       data nodes against a YANG schema.</t>
 
-      <t>The unvalidated "anydata" subtrees could create real problems for
-      large-scale production environments where a consumer of YANG data
-      messages expects the data to conform to a specific scheme but is unable
-      to verify it. For example, assume a network analytics platform that uses
-      <xref target="RFC8641">YANG-Push</xref> to collect the interface octet
-      counter <xref target="RFC8343">YANG Interface Management</xref> from
-      thousands of network nodes and compute the total traffic volume across
-      the network. Suppose one of the nodes is buggy and sends a message with
-      a large negative value for the interface octets counter. In that case,
-      the consumer without the ability to validate the "anydata" subtree will
-      not be able to detect the error and will compute an incorrect total
-      traffic volume, which could lead to inaccurate billing or capacity
-      planning decisions. Without a way to validate the "anydata" subtree, the
-      consumer is vulnerable to such errors, and troubleshooting such issues
-      can be challenging and time-consuming.</t>
+      <t>Unvalidated "anydata" subtrees prevents the automation of a YANG data
+      processing chain. This becomes a challenge for network operators
+      collecting a large amount of YANG data, Big Data, from their networks.
+      For example, assume that <xref target="RFC8641">YANG-Push</xref>
+      collects interface octet counters, <xref target="RFC8343">YANG Interface
+      Management</xref>, from thousands of network nodes and a network
+      analytics component computes the total traffic volume across the
+      network. Suppose one of the nodes has a software defect and sends a
+      YANG-Push notification with a large negative value for the interface
+      octets counter. In that case, the consumer without the ability to
+      validate the "anydata" subtree will not be able to detect the error and
+      will compute an incorrect total traffic volume, which could lead to
+      inaccurate billing or capacity planning decisions. Without the
+      capability to validate the "anydata" subtree, the YANG data consumer is
+      vulnerable to such errors, and troubleshooting such issues is
+      challenging and time-consuming.</t>
 
       <t><xref target="RFC8528">YANG Schema Mount</xref> allows mounting
       complete data models at implementation and run time. While powerful,
@@ -311,8 +312,6 @@
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9195.xml"/>
 
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8532.xml"/>
-
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8526.xml"/>
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9144.xml"/>
@@ -326,8 +325,6 @@
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8528.xml"/>
 
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.jouqui-netmod-yang-full-include.xml"/>
-
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-nmop-yang-message-broker-integration.xml"/>
       </references>
     </references>
 

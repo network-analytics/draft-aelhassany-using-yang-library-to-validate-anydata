@@ -5,7 +5,7 @@
 NMOP                                                        A. Elhassany
 Internet-Draft                                                   T. Graf
 Intended status: Standards Track                                Swisscom
-Expires: 23 March 2026                                 19 September 2025
+Expires: 23 April 2026                                   20 October 2025
 
 
                Validating anydata in YANG Library context
@@ -32,7 +32,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 March 2026.
+   This Internet-Draft will expire on 23 April 2026.
 
 Copyright Notice
 
@@ -53,27 +53,27 @@ Copyright Notice
 
 
 
-Elhassany & Graf          Expires 23 March 2026                 [Page 1]
+Elhassany & Graf          Expires 23 April 2026                 [Page 1]
 
-Internet-Draft             anydata validation             September 2025
+Internet-Draft             anydata validation               October 2025
 
 
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
      1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   3
-   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
    3.  Survey of existing use of "anydata" . . . . . . . . . . . . .   4
      3.1.  Documents that use "anydata" to operate on a datastore  .   4
-     3.2.  To operate on YANG-like data  . . . . . . . . . . . . . .   4
-   4.  Instantiated data node schema lookup  . . . . . . . . . . . .   4
+     3.2.  To operate on YANG-like data  . . . . . . . . . . . . . .   5
+   4.  Instantiated data node schema lookup  . . . . . . . . . . . .   5
    5.  Validating "anydata" Data Tree  . . . . . . . . . . . . . . .   5
-   6.  Implementation Status . . . . . . . . . . . . . . . . . . . .   5
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .   6
+   6.  Implementation Status . . . . . . . . . . . . . . . . . . . .   6
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .   7
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   8
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
@@ -91,28 +91,45 @@ Table of Contents
    children of an "anydata" node but do not check the data type of these
    data nodes against a YANG schema.
 
-   The unvalidated "anydata" subtrees could create real problems for
-   large-scale production environments where a consumer of YANG data
-   messages expects the data to conform to a specific scheme but is
-   unable to verify it.  For example, assume a network analytics
-   platform that uses YANG-Push [RFC8641] to collect the interface octet
-   counter YANG Interface Management [RFC8343] from thousands of network
-   nodes and compute the total traffic volume across the network.
-   Suppose one of the nodes is buggy and sends a message with a large
-   negative value for the interface octets counter.  In that case, the
-   consumer without the ability to validate the "anydata" subtree will
-   not be able to detect the error and will compute an incorrect total
-   traffic volume, which could lead to inaccurate billing or capacity
-   planning decisions.  Without a way to validate the "anydata" subtree,
-   the consumer is vulnerable to such errors, and troubleshooting such
-   issues can be challenging and time-consuming.
 
 
 
-Elhassany & Graf          Expires 23 March 2026                 [Page 2]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 23 April 2026                 [Page 2]
 
-Internet-Draft             anydata validation             September 2025
+Internet-Draft             anydata validation               October 2025
 
+
+   Unvalidated "anydata" subtrees prevents the automation of a YANG data
+   processing chain.  This becomes a challenge for network operators
+   collecting a large amount of YANG data, Big Data, from their
+   networks.  For example, assume that YANG-Push [RFC8641] collects
+   interface octet counters, YANG Interface Management [RFC8343], from
+   thousands of network nodes and a network analytics component computes
+   the total traffic volume across the network.  Suppose one of the
+   nodes has a software defect and sends a YANG-Push notification with a
+   large negative value for the interface octets counter.  In that case,
+   the consumer without the ability to validate the "anydata" subtree
+   will not be able to detect the error and will compute an incorrect
+   total traffic volume, which could lead to inaccurate billing or
+   capacity planning decisions.  Without the capability to validate the
+   "anydata" subtree, the YANG data consumer is vulnerable to such
+   errors, and troubleshooting such issues is challenging and time-
+   consuming.
 
    YANG Schema Mount [RFC8528] allows mounting complete data models at
    implementation and run time.  While powerful, schema mount cannot
@@ -143,6 +160,16 @@ Internet-Draft             anydata validation             September 2025
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
+
+
+
+
+
+Elhassany & Graf          Expires 23 April 2026                 [Page 3]
+
+Internet-Draft             anydata validation               October 2025
+
+
 2.  Terminology
 
    This document uses the terminology defined in YANG [RFC7950] for
@@ -159,16 +186,6 @@ Internet-Draft             anydata validation             September 2025
       identifier) for the data node and the data modeled within YANG.
 
    *  data tree: a tree of data nodes (with no values).
-
-
-
-
-
-
-Elhassany & Graf          Expires 23 March 2026                 [Page 3]
-
-Internet-Draft             anydata validation             September 2025
-
 
    *  datastore: defined in YANG [RFC7950] and refined in Network
       Management Datastore Architecture (NMDA) [RFC8342] is realized as
@@ -200,6 +217,15 @@ Internet-Draft             anydata validation             September 2025
    4.  To store an instance of a YANG data tree YANG Instance Data
        [RFC9195].
 
+
+
+
+
+Elhassany & Graf          Expires 23 April 2026                 [Page 4]
+
+Internet-Draft             anydata validation               October 2025
+
+
 3.2.  To operate on YANG-like data
 
    There are currently only two documents that are using "anydata" to
@@ -215,16 +241,6 @@ Internet-Draft             anydata validation             September 2025
    a node in an instantiated data tree, it can find the corresponding
    data node in a YANG schema.  For the existing YANG encodings, the
    following rules are defined to encode instantiated data nodes:
-
-
-
-
-
-
-Elhassany & Graf          Expires 23 March 2026                 [Page 4]
-
-Internet-Draft             anydata validation             September 2025
-
 
    *  In YANG XML encoding [RFC7950], The element's local name is the
       data node identifier, and its namespace is the module's XML
@@ -256,6 +272,16 @@ Internet-Draft             anydata validation             September 2025
    validation rules defined in the corresponding schema in the YANG
    Library.  The candidate does not apply the constraint checks.
 
+
+
+
+
+
+Elhassany & Graf          Expires 23 April 2026                 [Page 5]
+
+Internet-Draft             anydata validation               October 2025
+
+
 6.  Implementation Status
 
    Note to the RFC-Editor: Please remove this section before publishing.
@@ -274,13 +300,6 @@ Internet-Draft             anydata validation             September 2025
 9.  References
 
 9.1.  Normative References
-
-
-
-Elhassany & Graf          Expires 23 March 2026                 [Page 5]
-
-Internet-Draft             anydata validation             September 2025
-
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -309,6 +328,16 @@ Internet-Draft             anydata validation             September 2025
               DOI 10.17487/RFC8525, March 2019,
               <https://www.rfc-editor.org/info/rfc8525>.
 
+
+
+
+
+
+Elhassany & Graf          Expires 23 April 2026                 [Page 6]
+
+Internet-Draft             anydata validation               October 2025
+
+
    [RFC9254]  Veillette, M., Ed., Petrov, I., Ed., Pelov, A., Bormann,
               C., and M. Richardson, "Encoding of Data Modeled with YANG
               in the Concise Binary Object Representation (CBOR)",
@@ -316,27 +345,6 @@ Internet-Draft             anydata validation             September 2025
               <https://www.rfc-editor.org/info/rfc9254>.
 
 9.2.  Informative References
-
-   [I-D.ietf-nmop-yang-message-broker-integration]
-              Graf, T. and A. Elhassany, "An Architecture for YANG-Push
-              to Message Broker Integration", Work in Progress,
-              Internet-Draft, draft-ietf-nmop-yang-message-broker-
-              integration-08, 7 July 2025,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-nmop-
-              yang-message-broker-integration-08>.
-
-
-
-
-
-
-
-
-
-Elhassany & Graf          Expires 23 March 2026                 [Page 6]
-
-Internet-Draft             anydata validation             September 2025
-
 
    [I-D.jouqui-netmod-yang-full-include]
               Quilbeuf, J., Claise, B., and T. Joubert, "YANG Full
@@ -372,13 +380,6 @@ Internet-Draft             anydata validation             September 2025
               RFC 8528, DOI 10.17487/RFC8528, March 2019,
               <https://www.rfc-editor.org/info/rfc8528>.
 
-   [RFC8532]  Kumar, D., Wang, Z., Wu, Q., Ed., Rahman, R., and S.
-              Raghavan, "Generic YANG Data Model for the Management of
-              Operations, Administration, and Maintenance (OAM)
-              Protocols That Use Connectionless Communications",
-              RFC 8532, DOI 10.17487/RFC8532, April 2019,
-              <https://www.rfc-editor.org/info/rfc8532>.
-
    [RFC8639]  Voit, E., Clemm, A., Gonzalez Prieto, A., Nilsen-Nygaard,
               E., and A. Tripathy, "Subscription to YANG Notifications",
               RFC 8639, DOI 10.17487/RFC8639, September 2019,
@@ -388,10 +389,9 @@ Internet-Draft             anydata validation             September 2025
 
 
 
-
-Elhassany & Graf          Expires 23 March 2026                 [Page 7]
+Elhassany & Graf          Expires 23 April 2026                 [Page 7]
 
-Internet-Draft             anydata validation             September 2025
+Internet-Draft             anydata validation               October 2025
 
 
    [RFC8641]  Clemm, A. and E. Voit, "Subscription to YANG Notifications
@@ -445,4 +445,4 @@ Authors' Addresses
 
 
 
-Elhassany & Graf          Expires 23 March 2026                 [Page 8]
+Elhassany & Graf          Expires 23 April 2026                 [Page 8]
