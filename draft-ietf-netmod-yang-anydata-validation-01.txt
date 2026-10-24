@@ -1,0 +1,1680 @@
+
+
+
+
+NETMOD                                                      A. Elhassany
+Internet-Draft                                                   T. Graf
+Intended status: Informational                                  Swisscom
+Expires: 12 April 2027                                    9 October 2026
+
+
+               Validating anydata in YANG Library context
+              draft-ietf-netmod-yang-anydata-validation-01
+
+Abstract
+
+   The YANG "anydata" statement carries data whose data model is not
+   known when the module is designed.  This document defines the context
+   that is needed to validate such content: the schema context, the
+   "anydata" node, a schema anchor, and the datastore.  It describes how
+   this context is obtained for the uses of "anydata" in IETF YANG
+   modules, how the schema node of each node in the content is found,
+   and which YANG constraints are checked.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 12 April 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 1]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
+     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   6
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   6
+   3.  Survey of existing use of "anydata" . . . . . . . . . . . . .   7
+     3.1.  Selection filters . . . . . . . . . . . . . . . . . . . .  10
+     3.2.  Retrieved datastore content . . . . . . . . . . . . . . .  10
+     3.3.  Edits and differences . . . . . . . . . . . . . . . . . .  10
+     3.4.  Stored instance data and templates  . . . . . . . . . . .  11
+     3.5.  Message payloads  . . . . . . . . . . . . . . . . . . . .  12
+     3.6.  Content without a defined schema  . . . . . . . . . . . .  12
+     3.7.  Schema mount on an "anydata" node . . . . . . . . . . . .  12
+     3.8.  Related constructs that do not use "anydata"  . . . . . .  12
+     3.9.  Observations  . . . . . . . . . . . . . . . . . . . . . .  13
+   4.  Instantiated data node schema lookup  . . . . . . . . . . . .  13
+     4.1.  Schema Anchor . . . . . . . . . . . . . . . . . . . . . .  14
+     4.2.  Lookup Procedure  . . . . . . . . . . . . . . . . . . . .  15
+     4.3.  Encoding Rules for the First Level  . . . . . . . . . . .  16
+       4.3.1.  XML . . . . . . . . . . . . . . . . . . . . . . . . .  16
+       4.3.2.  JSON  . . . . . . . . . . . . . . . . . . . . . . . .  16
+       4.3.3.  CBOR  . . . . . . . . . . . . . . . . . . . . . . . .  17
+     4.4.  Anchor of the Surveyed Uses . . . . . . . . . . . . . . .  17
+     4.5.  Nested "anydata", "anyxml", and Schema Mount Points . . .  19
+     4.6.  Lookup Outcomes . . . . . . . . . . . . . . . . . . . . .  20
+   5.  Validating "anydata" Content  . . . . . . . . . . . . . . . .  21
+     5.1.  The anydata-complete and anydata-candidate Options  . . .  22
+     5.2.  Validation Procedure  . . . . . . . . . . . . . . . . . .  23
+     5.3.  Outcomes and Error Reporting  . . . . . . . . . . . . . .  23
+     5.4.  Example . . . . . . . . . . . . . . . . . . . . . . . . .  25
+   6.  Implementation Status . . . . . . . . . . . . . . . . . . . .  26
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  26
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  26
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  26
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  26
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  28
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  30
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  30
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 2]
+
+Internet-Draft             anydata validation               October 2026
+
+
+1.  Introduction
+
+   Section 7.10 of [RFC7950] defines the "anydata" statement to
+   represent an unknown set of nodes that can be modeled with YANG, but
+   whose data model is not known at module design time.  The same
+   section notes that the data model for anydata content can become
+   known through protocol signaling or other means, but it does not
+   require this and leaves those means out of scope.
+
+   Many IETF YANG modules use "anydata" (see Section 3), including
+   [RFC8040], [RFC8072], [RFC8526], [RFC8639], [RFC8641], [RFC9144], and
+   [RFC9195].  In most of these uses, the content is not arbitrary: the
+   defining document states in prose that it is YANG instance data from
+   a datastore, instantiated from the same modules the producer
+   implements.  When a server receives such content as input, for
+   example the value of a YANG Patch edit, it validates the content
+   against its own schema and datastore as part of processing the
+   operation.  When anydata content is produced as output, however, for
+   example in a YANG-Push notification or the reply to a datastore
+   comparison, no such step exists on the receiving side.  Current YANG
+   implementations accept any well-formed, namespace-qualified content
+   there and do not validate it against any YANG schema: not data types
+   or ranges, and not "mandatory", "min-elements", "must", or "when"
+   constraints.  Even input is not always validated: YANG configuration
+   templates [I-D.tt-netmod-yang-config-templates] store reusable
+   configuration as anydata content in <running>, and because that
+   content is opaque to the server, it cannot be validated when the
+   template is defined, only once the template is expanded.
+
+   That gap has become significant because anydata output is no longer
+   consumed only by the client that requested it.  For instance, network
+   operators collect YANG-Push notifications from thousands of network
+   nodes and forward them through message brokers into analytics
+   pipelines [I-D.ietf-nmop-yang-message-broker-integration].  The
+   components that consume this data are decoupled from the producer,
+   have no protocol session through which to learn its schema, and
+   process the data long after it was sent.  For example, the "in-
+   octets" counter of [RFC8343] is of type "yang:counter64".  If a
+   network node with a software defect sends a YANG-Push update with a
+   negative value for this counter, a consumer that validates the
+   anydata content against the producer's schema rejects the value as a
+   type violation.  A consumer that cannot validate accepts it, and an
+   analytics component that sums interface counters across the network
+   computes a wrong traffic volume, which can lead to inaccurate billing
+   or capacity planning.  Such errors are costly to trace back to their
+   source once the data has left the collection layer.
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 3]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   Validating anydata content requires four pieces of context, none of
+   which can be derived from the content alone:
+
+   1.  The schema context: the set of YANG modules, revisions, features,
+       and deviations from which the content was instantiated.  A YANG
+       Library instance [RFC8525] is one way to describe it, but a
+       validator can obtain the schema context by other means that are
+       outside the scope of this document.
+
+   2.  The anydata node: the schema node whose content is validated.  A
+       message can contain more than one anydata node, and each can
+       carry differently scoped content.
+
+   3.  The schema anchor: the schema node at which the content is
+       rooted.  Anydata content is not always encoded from the top of
+       the schema tree.  The value of a YANG Patch [RFC8072] edit is
+       encoded relative to the edit's target, and YANG-Push on-change
+       updates [RFC8641] and datastore comparison results [RFC9144] both
+       carry their data as YANG Patch edits.  Configuration template
+       content can likewise start at any level of the schema tree.  A
+       validator that assumes the top of the schema tree wrongly rejects
+       such content.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 4]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   4.  The datastore from which the content was taken.  It determines
+       which schema applies and which nodes may appear: the conventional
+       configuration datastores contain only "config true" nodes, while
+       <operational> also contains "config false" nodes (Section 5 of
+       [RFC8342]).  It also determines which constraints hold:
+       constraints that hold in <running> or <intended> do not
+       necessarily hold in <operational> (Section 5.3 of [RFC8342]).
+       Anydata content, however, is often a fragment of that datastore
+       rather than a complete copy of it, because a subscription filter,
+       a YANG Patch edit, or a configuration template selects only part
+       of the data tree.  The consumer therefore chooses between two
+       options, which follow the split in Section 8.1 of [RFC7950].
+       Under anydata-complete, the content, rooted at the schema anchor,
+       is treated as a complete data tree, and all constraints are
+       enforced.  Under anydata-candidate, the content is treated like
+       configuration in a candidate datastore that has not yet been
+       committed: every node is still checked against its schema node,
+       including data types, ranges, patterns, list keys, and choices,
+       but none of the constraints that only a valid data tree satisfies
+       ("must", "when", "unique", "mandatory", "min-elements", "max-
+       elements", and references to other nodes) is enforced.  The name
+       refers to this uncommitted state; it does not mean validation
+       against the <candidate> datastore.  For example, content from a
+       YANG-Push subscription to <running> whose filter excludes
+       mandatory leaves fails anydata-complete by construction, but it
+       can be validated with anydata-candidate.
+
+   Existing mechanisms do not provide this context.  YANG Schema Mount
+   [RFC8528] mounts complete data models at a fixed point of the schema
+   tree and cannot describe an arbitrary subset of an instantiated data
+   tree, such as one selected by a YANG-Push subscription filter.  YANG
+   Full Embed [I-D.jouqui-netmod-yang-full-include] complements Schema
+   Mount at module design time but has the same limitation.  A design-
+   time substatement of "anydata" could declare that the content of a
+   node is expected to be valid YANG instance data, but it cannot carry
+   the schema anchor or the datastore, because both are often known only
+   at run time, for example when a YANG-Push subscription is
+   established.
+
+   This document therefore defines the validation context of an anydata
+   node: the four inputs listed above, how each one is obtained for the
+   uses of "anydata" surveyed in Section 3, how the schema node of each
+   node in the content is found, and which constraints are checked under
+   each option.  Today, each implementation that validates anydata
+   content defines its own way to receive this context.  Other
+   specifications that use "anydata" can state how their content is
+   validated by referencing this document.  How the validation context
+   is conveyed to a validator is outside the scope of this document.
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 5]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   This document does not change the "anydata" statement, does not
+   constrain how YANG modules use "anydata", and does not require any
+   existing client or server to perform validation.
+
+   Validation remains optional and is a decision of the consumer.  A
+   consumer that detects non-conforming content can, for example,
+   discard the message, log it for further analysis, or alert an
+   operator, instead of passing incorrect data on to the systems that
+   depend on it.
+
+1.1.  Requirements Language
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.  Terminology
+
+   This document uses the terms data node, data tree, instance
+   identifier, schema node, and schema tree as defined in [RFC7950];
+   datastore, datastore schema, conventional configuration datastore,
+   operational state datastore (<operational>), client, server, and
+   notification as defined in [RFC8342]; and event record, event stream,
+   publisher, and receiver as defined in [RFC8639].
+
+   The following terms are defined in this document:
+
+   content:  The value of one instance of an "anydata" node, that is,
+      the data nodes encoded as its children, with their descendants
+      ("anydata content" in Section 7.10 of [RFC7950]).
+
+   first-level node:  A node of the content that is a direct child of
+      the "anydata" node in the encoded message.
+
+   fragment:  Content that is part of a data tree but leaves out nodes
+      of that data tree, for example because a selection filter, an
+      edit, or a configuration template selects only part of it.
+
+   schema context:  The set of YANG modules, with their revisions,
+      supported features, and deviations, and whether each module is
+      implemented or import-only, from which the content was
+      instantiated.  For content taken from a datastore, it is the set
+      of modules that defines the datastore schema of that datastore.
+      The content-schema of a YANG instance data set ([RFC9195]) is a
+      schema context.
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 6]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   schema anchor:  The schema node whose children are the first-level
+      nodes of the content (Section 4.1).  It is the root of the schema
+      tree, written "/", when the content is encoded from the top of the
+      data tree.
+
+   validation context:  The inputs needed to validate one instance of an
+      "anydata" node: the schema context, the "anydata" node, the schema
+      anchor, and the datastore.
+
+   producer:  The entity that encodes the content, for example a server
+      or a publisher.
+
+   consumer:  An entity that receives the content, for example a client
+      or a receiver, and decides whether it is validated, and with which
+      option.
+
+   validator:  An implementation that validates content as defined in
+      this document.
+
+   anydata-complete, anydata-candidate:  The two validation options
+      defined in Section 5.1.
+
+3.  Survey of existing use of "anydata"
+
+   This section lists the "anydata" nodes defined in published IETF YANG
+   modules and in active Internet-Drafts at the time of writing.  For
+   each use it records four facts that a validator needs and that the
+   defining document either states or leaves open:
+
+   Schema context:  where the set of YANG modules that describe the
+      content comes from.
+
+   Anchor:  the schema node that the top-level nodes of the content are
+      children of.  The anchor is the datastore root only for some uses;
+      others encode content relative to a path carried next to the
+      "anydata" node.
+
+   Datastore:  the datastore whose schema and validation rules apply, if
+      any.
+
+   Fragment:  whether the content can be a part of a data tree, for
+      example because a selection filter or an edit leaves out nodes,
+      including mandatory ones, that the full data tree contains.  "may"
+      means the content is a fragment when a filter is applied or when
+      the defining document allows partial data.
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 7]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   Table 1 lists the anchor, the datastore and whether the content is a
+   fragment for each use.  The subsections that follow group the uses by
+   purpose and describe their schema context.
+
+   +=========+==============+===============+================+========+
+   |Document | "anydata"    | Anchor        | Datastore      |Fragment|
+   |         | node         |               |                |        |
+   +=========+==============+===============+================+========+
+   |RFC 8526 | get-data     | root          | "datastore"    |yes     |
+   |         | input        |               | input leaf     |        |
+   |         | subtree-     |               |                |        |
+   |         | filter       |               |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8526 | get-data     | root          | "datastore"    |may     |
+   |         | output data  |               | input leaf     |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8526 | edit-data    | root          | "datastore"    |yes     |
+   |         | input config |               | input leaf     |        |
+   |         |              |               | (configuration |        |
+   |         |              |               | datastore)     |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8072 | yang-patch   | content       | datastore of   |yes     |
+   |         | edit value   | relative to   | the PATCH      |        |
+   |         |              | edit "target" | target         |        |
+   |         |              |               | resource       |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 9144 | compare      | root          | "source" and   |yes     |
+   |         | input        |               | "target" input |        |
+   |         | subtree-     |               | leaves         |        |
+   |         | filter       |               |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 9144 | compare      | content       | "target" and   |yes     |
+   |         | output edit  | relative to   | "source"       |        |
+   |         | value and    | edit "target" | datastores     |        |
+   |         | source-value |               | respectively   |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8639 | stream-      | "/" (first-   | none (event    |yes     |
+   |         | subtree-     | level node is | stream)        |        |
+   |         | filter       | a             |                |        |
+   |         |              | notification) |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8641 | datastore-   | root          | subscription's |yes     |
+   |         | subtree-     |               | target         |        |
+   |         | filter       |               | datastore      |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8641 | push-update  | root          | subscription's |may     |
+   |         | datastore-   |               | target         |        |
+   |         | contents     |               | datastore      |        |
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 8]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8641 | push-change- | content       | subscription's |yes     |
+   |         | update yang- | relative to   | target         |        |
+   |         | patch edit   | edit "target" | datastore      |        |
+   |         | value        |               |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 9195 | content-data | root          | not specified  |may     |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 9195 | inline-yang- | root          | none (fixed    |no      |
+   |         | library      |               | schema: ietf-  |        |
+   |         |              |               | yang-library)  |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8040 | errors error | not specified | none           |unknown |
+   |         | error-info   |               |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |RFC 8532 | test point   | root of the   | as for the     |no      |
+   |         | root (schema | mounted       | parent data    |        |
+   |         | mount point) | schema        | tree           |        |
+   +---------+--------------+---------------+----------------+--------+
+   |YANG     | template     | "data-path"   | <running>, or  |yes     |
+   |Templates| content      | leaf (any     | <system>       |        |
+   |         |              | level)        |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |Notif.   | envelope     | "/" (first-   | none (event    |no      |
+   |Envelope | contents     | level node is | stream)        |        |
+   |         |              | a             |                |        |
+   |         |              | notification) |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |YANG-Push| filter       | root          | subscription's |yes     |
+   |2        | subtree      |               | target         |        |
+   |         |              |               | datastore      |        |
+   +---------+--------------+---------------+----------------+--------+
+   |YANG-Push| update merge | content       | subscription's |yes     |
+   |2        | and          | relative to   | target         |        |
+   |         | replaced-by  | "path-prefix" | datastore      |        |
+   |         |              | plus "target- |                |        |
+   |         |              | path"         |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |Telemetry| message      | "/" (first-   | none; nested   |may     |
+   |Message  | payload      | level node is | "datastore-    |        |
+   |         |              | a YANG-Push   | contents" uses |        |
+   |         |              | notification) | the            |        |
+   |         |              |               | subscription's |        |
+   |         |              |               | target         |        |
+   |         |              |               | datastore      |        |
+   +---------+--------------+---------------+----------------+--------+
+   |Telemetry| label        | not specified | none           |unknown |
+   |Message  | anydata-     |               |                |        |
+
+
+
+Elhassany & Graf          Expires 12 April 2027                 [Page 9]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   |         | values       |               |                |        |
+   +---------+--------------+---------------+----------------+--------+
+   |Telemetry| subscription | "/" (first-   | as for the     |yes     |
+   |Message  | subtree-     | level node is | subscription   |        |
+   |         | filter       | a data node   |                |        |
+   |         |              | or a          |                |        |
+   |         |              | notification) |                |        |
+   +---------+--------------+---------------+----------------+--------+
+
+              Table 1: "anydata" nodes in IETF YANG modules
+
+3.1.  Selection filters
+
+   Subtree filters (Section 6 of [RFC6241]) are carried in "anydata" by
+   [RFC8526], [RFC9144], [RFC8641] and [I-D.ietf-netconf-yang-push-2],
+   where they select a subtree of a datastore, and by [RFC8639], where
+   they select event records from an event stream.  In the datastore
+   case the anchor is the datastore root of the datastore named by the
+   operation or the subscription.  In the event stream case the top-
+   level node is a notification, whose schema is defined by a
+   "notification" statement in the publisher's YANG Library; the content
+   is therefore not undefined YANG-like data.
+
+   A subtree filter is a pattern, not instance data: selection nodes are
+   empty, containment nodes may omit list keys, and mandatory nodes are
+   usually absent.  Only the node names, and the values of content match
+   nodes, can be checked against the schema.
+
+3.2.  Retrieved datastore content
+
+   The "data" output of get-data [RFC8526] and the "datastore-contents"
+   of push-update [RFC8641] carry the part of a datastore that matched a
+   selection filter, anchored at the datastore root.  The schema and the
+   validation rules are those of the selected datastore: content from
+   <operational> includes "config false" nodes and may carry origin
+   metadata [RFC7952], and it need not satisfy constraints that apply
+   only to configuration datastores (Section 5.3 of [RFC8342]).
+
+3.3.  Edits and differences
+
+   The edit-data operation [RFC8526] carries configuration anchored at
+   the datastore root, together with operation metadata, and the server
+   validates the result.
+
+   YANG Patch [RFC8072] carries the new content of each edit in the
+   "value" node.  The top-level node of "value" is an instance of the
+   data node identified by the "target" leaf.  "target" is an absolute
+   path when the PATCH request targets the datastore resource and a path
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 10]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   relative to the target resource otherwise (Section 2.4 of [RFC8072]).
+   The anchor is therefore the parent of the target data node, and it is
+   only known after "target" is resolved.  The anchor is kept as an
+   instance path with its list key values: the schema node is found by
+   ignoring the keys, and the keys identify the ancestor instances of
+   the content, so that references from the content to its ancestors can
+   be evaluated.
+
+   The YANG Patch structure is reused by push-change-update [RFC8641] to
+   report on-change updates of the subscription's target datastore, and
+   by the compare operation [RFC9144] to report differences.  RFC 8641
+   and RFC 9144 do not state the base of "target"; their examples use
+   absolute paths.  In RFC 9144, one edit carries content from two
+   datastores: "value" from the target datastore and "source-value", an
+   augmentation, from the source datastore.  The two nodes of the same
+   edit can therefore be subject to different datastore rules, for
+   example <intended> and <operational>.
+
+   The update notification of [I-D.ietf-netconf-yang-push-2] carries
+   "merge" and "replaced-by" content relative to the path formed by a
+   common "path-prefix" and a per-update "target-path".
+
+3.4.  Stored instance data and templates
+
+   YANG Instance Data [RFC9195] stores a data tree in "content-data",
+   anchored at the root, and states that the data MUST conform to the
+   YANG modules given in "content-schema".  The schema context is given
+   as a list of modules, as an inline YANG Library in the "inline-yang-
+   library" node, or as a reference to another instance data file.  RFC
+   9195 thus already describes the schema of "anydata" content with YANG
+   Library.  The "inline-yang-library" node is itself "anydata" whose
+   schema is fixed by its description (ietf-yang-library revision
+   2019-01-04).
+
+   YANG Configuration Templates [I-D.tt-netmod-yang-config-templates]
+   store template content as "anydata" in <running>, or in <system>
+   where supported.  A "data-path" leaf anchors the content at any
+   location of the schema tree, defaulting to the root.  Servers SHOULD
+   validate a template when it is defined and MUST validate it when it
+   is applied, but a template need not contain mandatory nodes, so
+   definition-time validation cannot apply all constraints.
+
+
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 11]
+
+Internet-Draft             anydata validation               October 2026
+
+
+3.5.  Message payloads
+
+   The notification envelope [I-D.ietf-netconf-notif-envelope] carries
+   the content of a notification in the "contents" node of a YANG
+   structure [RFC8791].  The name and namespace of the top-level node
+   are those of the module that defines the notification, so the content
+   can be validated against the publisher's YANG Library; it is not
+   datastore content.
+
+   The telemetry message
+   [I-D.ietf-nmop-message-broker-telemetry-message] carries the message
+   received from a network element in the "payload" node.  The payload
+   is a YANG-Push notification [RFC8641], so its first-level node is
+   that notification, under the root "/".  The "datastore-contents"
+   inside the notification is a nested "anydata" node with its own
+   validation context: its anchor is again "/", and its datastore is the
+   subscription's target datastore.  The subscription metadata
+   identifies that datastore and the filter, and can identify the
+   publisher's YANG Library through "yang-library-content-id".  Unlike
+   most uses, the message thus carries the schema context and the
+   datastore together with the content.  Operator labels may also carry
+   "anydata" values whose schema is not defined.
+
+3.6.  Content without a defined schema
+
+   RESTCONF [RFC8040] uses "error-info" to convey additional error
+   information as a container of data nodes.  Neither the anchor nor the
+   schema of that information is defined by RESTCONF or signaled in the
+   response.
+
+3.7.  Schema mount on an "anydata" node
+
+   The connectionless OAM model [RFC8532] defines an "anydata" node
+   named "root" with the "mount-point" extension of [RFC8528], so that
+   technology-specific modules can be mounted under each test point.
+   The mounted schema is described by the schema mount data, which
+   includes YANG library data for the mount point (Section 3.3 of
+   [RFC8528]).  The content is validated against that mounted schema,
+   with the root of the mounted schema as the anchor.  Section 3.1 of
+   [RFC8528] allows "mount-point" only as a substatement of "container"
+   and "list".
+
+3.8.  Related constructs that do not use "anydata"
+
+   *  NETCONF [RFC6241] and NETCONF Monitoring [RFC6022] use "anyxml"
+      for filters, retrieved data and edit content.  RFC 8526 replaces
+      these uses with "anydata" for NMDA datastores.  This document does
+      not change "anyxml".
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 12]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   *  YANG Schema Mount [RFC8528] and YANG Library [RFC8525] define no
+      "anydata" nodes.
+
+   *  A YANG structure [RFC8791] is encoded in the same way as an
+      "anydata" node, but its schema is defined by the "structure"
+      statement.
+
+   *  The list pagination extensions to NETCONF augment get-data
+      [RFC8526] with input parameters and add no "anydata" nodes.
+
+3.9.  Observations
+
+   *  Most uses carry content that a YANG Library can describe.  Only
+      RESTCONF "error-info" and the telemetry message labels leave the
+      schema undefined.
+
+   *  The anchor is not always the root.  YANG Patch, its reuse in RFC
+      8641 and RFC 9144, YANG-Push version 2 and configuration templates
+      encode content relative to a path carried next to the "anydata"
+      node.  For notification payloads the anchor is the root "/", and
+      the first-level node is the notification itself.
+
+   *  The applicable validation rules depend on the datastore, and one
+      message can carry content from two datastores (RFC 9144).
+
+   *  Most uses carry fragments: filters, filtered retrievals, edits,
+      differences and templates leave out nodes of the full data tree.
+      A fragment taken from a configuration datastore, such as a YANG-
+      Push subscription to <running> whose filter excludes mandatory
+      leaves, cannot satisfy the constraints that need complete data.
+      The validation rules stay those of the datastore, and the consumer
+      chooses whether to apply complete or candidate validation to a
+      given "anydata" node.
+
+4.  Instantiated data node schema lookup
+
+   To validate "anydata" content, a validator first has to find, for
+   each instantiated data node in the content, the schema node it is an
+   instance of.  This section defines that lookup.  It uses the four
+   inputs of the validation context: the schema context, the "anydata"
+   node, the schema anchor, and the datastore.
+
+   Below the first level of the content, no new rule is needed.  Each
+   encoding already identifies a child node relative to its parent
+   (Section 7 of [RFC7950], Section 4 of [RFC7951], Section 3 of
+   [RFC9254]).  What the encodings do not define is the parent of the
+   first-level nodes.  This document uses the schema anchor as that
+   parent.
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 13]
+
+Internet-Draft             anydata validation               October 2026
+
+
+4.1.  Schema Anchor
+
+   When the content is encoded from the top of the data tree, the schema
+   anchor is the root of the schema tree, written "/".  Otherwise, the
+   anchor is a container, a list, a notification, or the input or output
+   of an RPC or action.
+
+   The anchor is represented as a node-instance-identifier ([RFC8341]):
+   an instance-identifier in which key predicates are optional.  The
+   validator removes the key predicates and resolves the remaining path
+   to a schema node.  Choice and case nodes do not appear in the path,
+   as in any instance-identifier.  When the key predicates are present,
+   the validator can also instantiate the ancestors of the content,
+   including their list keys.  This allows "must", "when", and leafref
+   expressions in the content that refer to ancestor nodes to be
+   evaluated.  When they are absent, the ancestors cannot be
+   instantiated: which list entry the content belongs to is unknown, so
+   a reference that leaves the content through an ancestor cannot be
+   resolved.  Such references are treated as references to nodes outside
+   the content (see Section 5).  The lookup itself does not need the key
+   predicates.
+
+   The anchor changes where the first-level nodes are looked up.  It
+   does not change the root of the data tree.  Absolute paths that
+   appear in the content or in its schema, such as leafref "path"
+   statements, "must" and "when" expressions, and instance-identifier
+   values, are evaluated from the root of the data tree, as defined in
+   Section 6.4.1 of [RFC7950].  In this respect the anchor differs from
+   a schema mount point, under which paths are interpreted with the
+   mount point as the root node (Section 4 of [RFC8528]).
+
+   Defining documents identify the anchor in one of two ways:
+
+   Target:  A path carried with the content identifies the instance that
+      the content is, for example the "target" of a YANG Patch edit
+      [RFC8072].  The first-level node of the content is an instance of
+      the schema node identified by the path, and the anchor is the
+      parent of that schema node.  A path of "/" is handled as defined
+      by the document that carries it.
+
+      The "target" of [RFC8072], which [RFC8641] and [RFC9144] reuse, is
+      not an instance-identifier.  Its type, "target-resource-offset",
+      is encoded as a data resource identifier of a RESTCONF request URI
+      (Section 3.5.3 of [RFC8040]), for example "/song=Dear%20Rosemary".
+      The validator converts such a path to the JSON encoding of an
+      instance-identifier (Section 6.11 of [RFC7951]), which uses the
+      same rule for module names: each "list=key1,key2" step becomes the
+      list name followed by one key predicate per key, in the order of
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 14]
+
+Internet-Draft             anydata validation               October 2026
+
+
+      the list's "key" statement, and each key value is percent-decoded.
+      When the target is relative to the target resource (Section 2.4 of
+      [RFC8072]), the path of the target resource is converted in the
+      same way and prepended.
+
+   Location:  A path carried with the content identifies the location
+      under which the content is placed, for example the "data-path" of
+      a configuration template [I-D.tt-netmod-yang-config-templates].
+      The first-level nodes of the content are children of the schema
+      node identified by the path, and the anchor is that schema node.
+
+   In both cases, the anchor is a property of an instance of the
+   "anydata" node, not of the "anydata" schema node.  For example, each
+   edit of a YANG Patch carries its own "target", and therefore the
+   "value" of each edit has its own anchor.
+
+   At the root anchor, a first-level node is either a top-level data
+   node or a top-level notification.  When the validation context names
+   a datastore, the first-level nodes MUST be data nodes.  When the
+   content is an event record from an event stream, as in [RFC8639] and
+   [I-D.ietf-netconf-notif-envelope], the first-level node MUST be a
+   notification.
+
+4.2.  Lookup Procedure
+
+   A validator performs the lookup for one instance of an "anydata" node
+   as follows:
+
+   1.  Resolve the anchor in the schema context.  If the anchor cannot
+       be resolved, or resolves to a node that cannot have children, the
+       content is not validated (see Section 4.6).
+
+   2.  For each first-level node, determine its module from the
+       encoding, as defined in Section 4.3.
+
+   3.  Find the schema node with that module and identifier among the
+       schema children of the anchor, looking through choice and case
+       nodes and including nodes added by "augment" statements.  A
+       schema node is eligible only if the module that defines it is
+       implemented in the schema context (Section 5.6.5 of [RFC7950]),
+       its "if-feature" statements are satisfied, and no deviation in
+       the schema context removes it.
+
+   4.  Look up the descendants of each first-level node with the rules
+       of the encoding, without change.  When the lookup reaches an
+       "anydata", "anyxml", or schema mount point node, continue as
+       defined in Section 4.5.
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 15]
+
+Internet-Draft             anydata validation               October 2026
+
+
+4.3.  Encoding Rules for the First Level
+
+4.3.1.  XML
+
+   The XML encoding needs no additional rule.  The value of an "anydata"
+   node is a set of nodes encoded as subelements of the "anydata"
+   element (Section 7.10.2 of [RFC7950]), and the namespace of each
+   subelement is the XML namespace of the module that defines the node.
+   The namespace of every element is resolved by the XML namespace
+   rules, including declarations inherited from ancestor elements.  A
+   first-level element without its own namespace declaration therefore
+   inherits the default namespace in scope at the "anydata" element,
+   which is usually the namespace of the module that defines the
+   "anydata" node.
+
+   The namespace declarations in scope at the "anydata" element also
+   apply to prefixes used in values of the content, such as identityref
+   and instance-identifier values (Section 9.10.3 of [RFC7950],
+   Section 9.13.2 of [RFC7950]).  A validator that extracts the content
+   from the message MUST preserve these declarations.
+
+4.3.2.  JSON
+
+   A member name is either namespace-qualified or simple, and a simple
+   name belongs to the module of its parent node (Section 4 of
+   [RFC7951]).  The content of an "anydata" node follows the same rules
+   (Section 5.5 of [RFC7951]).  For the first-level members, the anchor
+   takes the role of the parent node.  This matches the YANG Patch
+   examples, where an edit whose target is a list entry of the target
+   resource carries the list with a simple member name (Appendix A.1.2
+   of [RFC8072]), and an edit whose target is in the datastore carries a
+   namespace-qualified name (Appendix A.1.5 of [RFC8072]).  Therefore:
+
+   *  A first-level member name MUST be namespace-qualified when the
+      anchor is the root or when the module of the node differs from the
+      module of the anchor.  Otherwise, the simple form is used.
+
+   *  A validator resolves a simple first-level member name in the
+      module of the anchor.  A simple first-level member name at the
+      root anchor is an error.
+
+   *  A validator SHOULD also accept a namespace-qualified first-level
+      member name whose module is the module of the anchor, because a
+      producer may have qualified it relative to the "anydata" node.
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 16]
+
+Internet-Draft             anydata validation               October 2026
+
+
+4.3.3.  CBOR
+
+   When the content of an "anydata" node (Section 4.5 of [RFC9254]) uses
+   names as map keys, the rules for JSON above apply, as Section 3.3 of
+   [RFC9254] uses the same qualification rule as JSON.
+
+   When the content uses YANG Schema Item iDentifiers (SIDs) [RFC9595]
+   as map keys, the reference SID of the first-level map is determined
+   by Section 3.2 of [RFC9254]: it is the SID of the "anydata" node, or
+   zero if the "anydata" node is encoded with a name as its key.  A
+   first-level key can also be an absolute SID (tag 47).  Because a SID
+   identifies a schema node independently of its position, the anchor is
+   not needed to identify the node.  The validator MUST check that the
+   identified schema node is a child of the anchor.  When SIDs are used,
+   the schema context includes the SID assignments of its modules.
+
+4.4.  Anchor of the Surveyed Uses
+
+   For each use of "anydata" listed in Section 3, the anchor is obtained
+   as follows.
+
+   +================================================+=============+========+
+   |Use                                             |Anchor       |Way     |
+   +================================================+=============+========+
+   |get-data output "data" and edit-data input      |"/"          |fixed   |
+   |"config" [RFC8526]; "content-data" [RFC9195];   |             |        |
+   |push-update "datastore-contents" [RFC8641]      |             |        |
+   +------------------------------------------------+-------------+--------+
+   |YANG Patch edit "value" [RFC8072]               |the edit's   |Target  |
+   |                                                |"target",    |        |
+   |                                                |relative to  |        |
+   |                                                |the target   |        |
+   |                                                |resource     |        |
+   |                                                |unless the   |        |
+   |                                                |target       |        |
+   |                                                |resource is  |        |
+   |                                                |the datastore|        |
+   |                                                |(Section 2.4 |        |
+   |                                                |of [RFC8072])|        |
+   +------------------------------------------------+-------------+--------+
+   |push-change-update edit "value" [RFC8641]       |the edit's   |Target  |
+   |                                                |"target"     |        |
+   +------------------------------------------------+-------------+--------+
+   |compare output edit "value" and "source-value"  |the edit's   |Target  |
+   |[RFC9144]                                       |"target"     |        |
+   +------------------------------------------------+-------------+--------+
+   |update "merge" and "replaced-by"                |"path-prefix"|Target  |
+   |[I-D.ietf-netconf-yang-push-2]                  |followed by  |        |
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 17]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   |                                                |"target-path"|        |
+   +------------------------------------------------+-------------+--------+
+   |template "content"                              |"data-path"  |Location|
+   |[I-D.tt-netmod-yang-config-templates]           |             |        |
+   +------------------------------------------------+-------------+--------+
+   |envelope "contents"                             |"/" (a       |fixed   |
+   |[I-D.ietf-netconf-notif-envelope]; telemetry    |notification)|        |
+   |message "payload"                               |             |        |
+   |[I-D.ietf-nmop-message-broker-telemetry-message]|             |        |
+   +------------------------------------------------+-------------+--------+
+   |subtree filters: get-data [RFC8526], compare    |"/"          |fixed   |
+   |[RFC9144], "datastore-subtree-filter" [RFC8641],|             |        |
+   |filter "subtree" [I-D.ietf-netconf-yang-push-2],|             |        |
+   |subscription "subtree-filter"                   |             |        |
+   |[I-D.ietf-nmop-message-broker-telemetry-message]|             |        |
+   +------------------------------------------------+-------------+--------+
+   |"stream-subtree-filter" [RFC8639]               |"/" (a       |fixed   |
+   |                                                |notification)|        |
+   +------------------------------------------------+-------------+--------+
+   |"inline-yang-library" [RFC9195]                 |"/", with    |fixed   |
+   |                                                |ietf-yang-   |        |
+   |                                                |library      |        |
+   |                                                |revision     |        |
+   |                                                |2019-01-04 as|        |
+   |                                                |the schema   |        |
+   |                                                |context      |        |
+   +------------------------------------------------+-------------+--------+
+   |test point "root" [RFC8532]                     |root of the  |fixed   |
+   |                                                |mounted      |        |
+   |                                                |schema; the  |        |
+   |                                                |schema       |        |
+   |                                                |context is   |        |
+   |                                                |the mounted  |        |
+   |                                                |YANG library |        |
+   |                                                |data         |        |
+   |                                                |(Section 3.3 |        |
+   |                                                |of [RFC8528])|        |
+   +------------------------------------------------+-------------+--------+
+   |"error-info" [RFC8040]; label "anydata-values"  |not defined  |none    |
+   |[I-D.ietf-nmop-message-broker-telemetry-message]|             |        |
+   +------------------------------------------------+-------------+--------+
+
+               Table 2: Anchor of the surveyed "anydata" uses
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 18]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   A subtree filter is a pattern, not instance data (Section 6 of
+   [RFC6241]): its nodes are looked up as defined here, but only node
+   names and the values of content match nodes can be checked.  Where
+   the defining document gives no anchor and no schema, as for "error-
+   info" and the telemetry message labels, the content is not validated.
+
+   Neither [RFC8641] nor [RFC9144] states what the "target" of an edit
+   is relative to; their examples use absolute paths, and this document
+   assumes absolute paths for both.  In [RFC9144], "value" and "source-
+   value" of the same edit share the anchor but come from different
+   datastores, so each is validated with its own validation context.
+
+   A selection filter does not change the anchor.  A subtree filter can
+   select several subtrees of a datastore (Section 3.6 of [RFC8641]),
+   and an XPath filter can select any node set, but the selected data is
+   still encoded from the root of the data tree.  One root anchor
+   therefore covers all selected subtrees, and the nodes that the filter
+   left out are handled by the option chosen in Section 5.  None of the
+   surveyed uses encodes, in one instance of an "anydata" node, first-
+   level nodes that are children of different schema nodes, so a single
+   anchor per instance is sufficient.
+
+4.5.  Nested "anydata", "anyxml", and Schema Mount Points
+
+   anyxml:
+      The content of an "anydata" node consists of nodes that can be
+      modeled with YANG, except anyxml (Section 7.10 of [RFC7950]).  An
+      instance of an "anyxml" node in the content is an error.
+
+   Nested "anydata":
+      The content of an "anydata" node inside the content is validated
+      only if the validator has a validation context for that "anydata"
+      node, with its own anchor and datastore.  Otherwise, its content
+      is not validated, and the validator reports it as such.  For
+      example, the "payload" of a telemetry message
+      [I-D.ietf-nmop-message-broker-telemetry-message] is a YANG-Push
+      notification whose "datastore-contents" is itself an "anydata"
+      node with a different datastore.
+
+   Schema mount points:
+      Below a schema mount point [RFC8528], the lookup continues in the
+      mounted schema, which is identified by the schema mount data and
+      the YANG library data of that mount point (Section 3.3 of
+      [RFC8528]).  When the content is a fragment, that data is usually
+      not part of the content, so the schema context has to include it.
+      If the mounted schema is not available, the content below the
+      mount point is not validated.
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 19]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   Metadata annotations [RFC7952] attached to nodes in the content, such
+   as the "origin" annotation of <operational>, are resolved in the
+   schema context like any other annotation.  This document defines no
+   new annotations.  The validation context applies to the whole content
+   of one "anydata" instance and is known when the content is produced;
+   it is not a property of individual nodes.  The uses surveyed in
+   Section 3 already carry the anchor and the datastore next to the
+   "anydata" node, in the YANG Patch target, the template data-path, or
+   the subscription, so an annotation would duplicate them.  An
+   annotation remains possible for a use that carries neither, and this
+   document does not preclude one.
+
+4.6.  Lookup Outcomes
+
+   The lookup of one instance of an "anydata" node ends in one of three
+   outcomes:
+
+   Found:  Every node in the content has a schema node.  Validation
+      continues as defined in Section 5.
+
+   Invalid:  At least one node in the content has no schema node, or is
+      placed where its schema node is not allowed.
+
+   Not validated:  The validator lacks the context to perform the
+      lookup, for all of the content or for a subtree of it.  This is
+      not evidence that the content is wrong.
+
+   A validator reports errors with the "error-tag" values of Appendix A
+   of [RFC6241], as listed in Table 3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 20]
+
+Internet-Draft             anydata validation               October 2026
+
+
+     +==============================+===========+===================+
+     | Case                         | Outcome   | error-tag         |
+     +==============================+===========+===================+
+     | The namespace or module name | invalid   | unknown-namespace |
+     | of a node is not in the      |           |                   |
+     | schema context               |           |                   |
+     +------------------------------+-----------+-------------------+
+     | The module is in the schema  | invalid   | unknown-element   |
+     | context but not implemented, |           |                   |
+     | or the node is removed by a  |           |                   |
+     | feature or deviation         |           |                   |
+     +------------------------------+-----------+-------------------+
+     | The schema node exists, but  | invalid   | unknown-element   |
+     | not as a child of the anchor |           |                   |
+     | or of the parent node        |           |                   |
+     +------------------------------+-----------+-------------------+
+     | A JSON or CBOR member name   | invalid   | bad-element       |
+     | is not a valid name, or is   |           |                   |
+     | simple at the root anchor    |           |                   |
+     +------------------------------+-----------+-------------------+
+     | An instance of an "anyxml"   | invalid   | bad-element       |
+     | node                         |           |                   |
+     +------------------------------+-----------+-------------------+
+     | The anchor cannot be         | not       | none              |
+     | resolved                     | validated |                   |
+     +------------------------------+-----------+-------------------+
+     | Nested "anydata" without a   | not       | none              |
+     | validation context, or a     | validated |                   |
+     | mounted schema that is not   | (subtree) |                   |
+     | available                    |           |                   |
+     +------------------------------+-----------+-------------------+
+
+                         Table 3: Lookup failures
+
+5.  Validating "anydata" Content
+
+   This section defines how a validator checks "anydata" content once
+   the schema lookup of Section 4 has found a schema node for every node
+   in it.  It does not define new constraints.  It selects which of the
+   constraints of Section 8.1 of [RFC7950] are checked, using two
+   options: anydata-complete and anydata-candidate.  The consumer
+   chooses the option for each instance of an "anydata" node; this
+   document does not define a default.
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 21]
+
+Internet-Draft             anydata validation               October 2026
+
+
+5.1.  The anydata-complete and anydata-candidate Options
+
+   Section 8.1 of [RFC7950] separates the properties that are true in
+   all data trees from the properties that are true in a valid data
+   tree.  A configuration datastore that is not yet committed, such as
+   <candidate>, satisfies the first set at all times and the second set
+   only when it is validated (Section 8.3.3 of [RFC7950]).  The two
+   options follow this split.
+
+   anydata-candidate:
+      The validator checks every node of the content against its schema
+      node:
+
+      *  All leaf and leaf-list values match the type of their schema
+         node, including "range", "length", and "pattern" restrictions.
+         The value of a leafref matches the type of the leaf it refers
+         to, but the referenced instance is not required to exist.
+
+      *  All key leafs are present for all list entries.
+
+      *  Nodes are present for at most one case branch of each choice.
+
+      *  No node is present whose "if-feature" expression evaluates to
+         "false" in the schema context.
+
+      *  No "config false" node is present when the datastore is a
+         conventional configuration datastore (Section 5 of [RFC8342]).
+
+      "must", "when", "unique", "mandatory", "min-elements", and "max-
+      elements" statements are not checked, and leafref and instance-
+      identifier references are not required to resolve.  Evaluating
+      "when" can require nodes that are not part of the content, so it
+      is not checked under this option even though Section 8.1 of
+      [RFC7950] lists it among the properties of all data trees.
+
+   anydata-complete:
+      The validator performs all checks of anydata-candidate and, in
+      addition, checks every property that Section 8.1 of [RFC7950]
+      requires of a valid data tree: "when", "must", "unique",
+      "mandatory", "min-elements", and "max-elements", and the
+      referential integrity of leafref and instance-identifier values
+      whose "require-instance" is "true".
+
+      The content is treated as self-contained.  Expressions and
+      references are evaluated on a data tree that consists of the
+      ancestors instantiated from the schema anchor (Section 4.1) and
+      the content.  A reference to a node that is not in this data tree
+      is not satisfied.
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 22]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   The anydata-complete option is intended for content that is complete
+   for its schema anchor, such as the full reply to a get-data operation
+   [RFC8526] on <running> or a YANG instance data file [RFC9195].
+   Content that is a fragment, such as the output of a subscription
+   filter, a YANG Patch edit, or a configuration template, is expected
+   to fail anydata-complete, and so is content from <operational>, in
+   which semantic constraints may be violated (Section 5.3 of
+   [RFC8342]).  Such content is validated with anydata-candidate.
+
+   A validator can use additional instance data of the datastore, such
+   as a copy of it, to resolve references that leave the content.  The
+   content is then validated as part of that data tree.  How such data
+   is obtained is outside the scope of this document.  Without such
+   data, a reference to a node that is not in the data tree formed by
+   the ancestors of the schema anchor and the content is not satisfied
+   under anydata-complete and is not checked under anydata-candidate.
+
+5.2.  Validation Procedure
+
+   A validator validates one instance of an "anydata" node as follows:
+
+   1.  Perform the schema lookup of Section 4.2.  If the lookup ends in
+       "invalid" or "not validated" (Section 4.6), validation ends with
+       the same outcome.
+
+   2.  Instantiate the ancestors of the content from the schema anchor,
+       including the key leafs given in its predicates, and place the
+       content under the anchor.
+
+   3.  Apply the checks of the selected option (Section 5.1).
+
+   4.  For each nested "anydata" node in the content, repeat this
+       procedure with the validation context of that node if one is
+       available.  Otherwise, its content is not validated
+       (Section 4.5).
+
+   A validator MUST support both options and MUST follow this procedure.
+   A validator MUST NOT report content as invalid because context needed
+   for the lookup or for validation is missing.
+
+5.3.  Outcomes and Error Reporting
+
+   Validation of one instance of an "anydata" node ends in one of the
+   outcomes of Section 4.6: valid, invalid, or not validated.  A result
+   also names the option that was applied, and lists any subtrees that
+   were not validated.
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 23]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   A validator reports errors with the "error-tag" and "error-app-tag"
+   values that [RFC7950] already assigns to each violation, as listed in
+   Table 4.  The "error-path" is the path from the root of the data
+   tree, including the ancestors instantiated from the schema anchor.
+
+    +=====================+================+=================+========+
+    | Violation           |error-tag       |error-app-tag    |Option  |
+    +=====================+================+=================+========+
+    | Value does not      |invalid-value   |from the         |both    |
+    | match its type      |                |restriction, if  |        |
+    | (Section 8.3.1 of   |                |any              |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | Missing key leaf    |missing-element |                 |both    |
+    | (Section 8.3.1 of   |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | More than one case  |bad-element     |                 |both    |
+    | branch              |                |                 |        |
+    | (Section 8.3.1 of   |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | Node with a false   |unknown-element |                 |both    |
+    | "if-feature"        |                |                 |        |
+    | (Section 8.3.1 of   |                |                 |        |
+    | [RFC7950]), or      |                |                 |        |
+    | "config false" in a |                |                 |        |
+    | conventional        |                |                 |        |
+    | configuration       |                |                 |        |
+    | datastore           |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | Node with a false   |unknown-element |                 |complete|
+    | "when"              |                |                 |        |
+    | (Section 8.3.1 of   |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | "unique"            |operation-failed|data-not-unique  |complete|
+    | (Section 15.1 of    |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | "max-elements"      |operation-failed|too-many-elements|complete|
+    | (Section 15.2 of    |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | "min-elements"      |operation-failed|too-few-elements |complete|
+    | (Section 15.3 of    |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 24]
+
+Internet-Draft             anydata validation               October 2026
+
+
+    | "must"              |operation-failed|must-violation,  |complete|
+    | (Section 15.4 of    |                |unless the       |        |
+    | [RFC7950])          |                |statement has its|        |
+    |                     |                |own              |        |
+    +---------------------+----------------+-----------------+--------+
+    | Leafref or          |data-missing    |instance-required|complete|
+    | instance-identifier |                |                 |        |
+    | without instance    |                |                 |        |
+    | (Section 15.5 of    |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | Mandatory choice    |data-missing    |missing-choice   |complete|
+    | (Section 15.6 of    |                |                 |        |
+    | [RFC7950])          |                |                 |        |
+    +---------------------+----------------+-----------------+--------+
+    | Mandatory leaf      |missing-element |                 |complete|
+    +---------------------+----------------+-----------------+--------+
+
+                         Table 4: Validation errors
+
+   What a consumer does with the outcome is outside the scope of this
+   document.  A consumer can, for example, pass valid content on,
+   discard or quarantine invalid content and alert an operator, and pass
+   on content that was not validated while counting it.
+
+5.4.  Example
+
+   A YANG-Push subscription [RFC8641] to <operational> selects the
+   interface statistics of [RFC8343].  The anchor of the "datastore-
+   contents" node is "/", the datastore is <operational>, and the
+   consumer chooses anydata-candidate.  A network node with a software
+   defect sends the following update:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 25]
+
+Internet-Draft             anydata validation               October 2026
+
+
+           <notification
+               xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+             <eventTime>2026-10-09T10:00:00Z</eventTime>
+             <push-update xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-push">
+               <id>1011</id>
+               <datastore-contents>
+                 <interfaces
+                     xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                   <interface>
+                     <name>eth0</name>
+                     <statistics>
+                       <in-octets>-4271233</in-octets>
+                     </statistics>
+                   </interface>
+                 </interfaces>
+               </datastore-contents>
+             </push-update>
+           </notification>
+
+   The lookup finds a schema node for every element.  Step 3 checks the
+   value of "in-octets" against its type, "yang:counter64", whose range
+   is 0 to 18446744073709551615.  The value is outside that range, so
+   the outcome is invalid, with error-tag "invalid-value" and error-path
+   "/if:interfaces/if:interface[if:name='eth0']/if:statistics/if:in-
+   octets".  Because the update is a fragment, anydata-complete would
+   also report the missing mandatory "type" leaf with error-tag
+   "missing-element", even though the content is a correct part of
+   <operational>.
+
+6.  Implementation Status
+
+   Note to the RFC-Editor: Please remove this section before publishing.
+
+   anydata-candidate validation is implemented for libyang and available
+   at https://github.com/ahassany/libyang/tree/anydata-strict-parsing
+
+7.  IANA Considerations
+
+   This memo includes no request to IANA.
+
+8.  Security Considerations
+
+   TBD
+
+9.  References
+
+9.1.  Normative References
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 26]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC6241]  Enns, R., Ed., Bjorklund, M., Ed., Schoenwaelder, J., Ed.,
+              and A. Bierman, Ed., "Network Configuration Protocol
+              (NETCONF)", RFC 6241, DOI 10.17487/RFC6241, June 2011,
+              <https://www.rfc-editor.org/info/rfc6241>.
+
+   [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
+              RFC 7950, DOI 10.17487/RFC7950, August 2016,
+              <https://www.rfc-editor.org/info/rfc7950>.
+
+   [RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
+              RFC 7951, DOI 10.17487/RFC7951, August 2016,
+              <https://www.rfc-editor.org/info/rfc7951>.
+
+   [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
+              Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
+              <https://www.rfc-editor.org/info/rfc8040>.
+
+   [RFC8072]  Bierman, A., Bjorklund, M., and K. Watsen, "YANG Patch
+              Media Type", RFC 8072, DOI 10.17487/RFC8072, February
+              2017, <https://www.rfc-editor.org/info/rfc8072>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC8341]  Bierman, A. and M. Bjorklund, "Network Configuration
+              Access Control Model", STD 91, RFC 8341,
+              DOI 10.17487/RFC8341, March 2018,
+              <https://www.rfc-editor.org/info/rfc8341>.
+
+   [RFC8342]  Bjorklund, M., Schoenwaelder, J., Shafer, P., Watsen, K.,
+              and R. Wilton, "Network Management Datastore Architecture
+              (NMDA)", RFC 8342, DOI 10.17487/RFC8342, March 2018,
+              <https://www.rfc-editor.org/info/rfc8342>.
+
+   [RFC8525]  Bierman, A., Bjorklund, M., Schoenwaelder, J., Watsen, K.,
+              and R. Wilton, "YANG Library", RFC 8525,
+              DOI 10.17487/RFC8525, March 2019,
+              <https://www.rfc-editor.org/info/rfc8525>.
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 27]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   [RFC9254]  Veillette, M., Ed., Petrov, I., Ed., Pelov, A., Bormann,
+              C., and M. Richardson, "Encoding of Data Modeled with YANG
+              in the Concise Binary Object Representation (CBOR)",
+              RFC 9254, DOI 10.17487/RFC9254, July 2022,
+              <https://www.rfc-editor.org/info/rfc9254>.
+
+   [RFC9595]  Veillette, M., Ed., Pelov, A., Ed., Petrov, I., Ed.,
+              Bormann, C., and M. Richardson, "YANG Schema Item
+              iDentifier (YANG SID)", RFC 9595, DOI 10.17487/RFC9595,
+              July 2024, <https://www.rfc-editor.org/info/rfc9595>.
+
+9.2.  Informative References
+
+   [I-D.ietf-netconf-notif-envelope]
+              Feng, A. H., Francois, P., Graf, T., and B. Claise,
+              "Extensible YANG Model for YANG-Push Notifications", Work
+              in Progress, Internet-Draft, draft-ietf-netconf-notif-
+              envelope-06, 14 September 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-
+              notif-envelope-06>.
+
+   [I-D.ietf-netconf-yang-push-2]
+              Wilton, R., Keller, H., Claise, B., Aries, E., Cumming,
+              J., and T. Graf, "YANG Datastore Telemetry (YANG Push
+              version 2)", Work in Progress, Internet-Draft, draft-ietf-
+              netconf-yang-push-2-00, 26 June 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-
+              yang-push-2-00>.
+
+   [I-D.ietf-nmop-message-broker-telemetry-message]
+              Elhassany, A., Graf, T., and P. Lucente, "Extensible YANG
+              Model for Network Telemetry Messages", Work in Progress,
+              Internet-Draft, draft-ietf-nmop-message-broker-telemetry-
+              message-05, 19 July 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-nmop-
+              message-broker-telemetry-message-05>.
+
+   [I-D.ietf-nmop-yang-message-broker-integration]
+              Graf, T. and A. Elhassany, "An Architecture for YANG-Push
+              to Message Broker Integration", Work in Progress,
+              Internet-Draft, draft-ietf-nmop-yang-message-broker-
+              integration-13, 2 July 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-nmop-
+              yang-message-broker-integration-13>.
+
+   [I-D.jouqui-netmod-yang-full-include]
+              Quilbeuf, J., Claise, B., and T. Joubert, "YANG Full
+              Embed", Work in Progress, Internet-Draft, draft-jouqui-
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 28]
+
+Internet-Draft             anydata validation               October 2026
+
+
+              netmod-yang-full-include-02, 5 July 2024,
+              <https://datatracker.ietf.org/doc/html/draft-jouqui-
+              netmod-yang-full-include-02>.
+
+   [I-D.tt-netmod-yang-config-templates]
+              Watsen, K., Ma, Q., and D. Rajaram, "YANG Configuration
+              Templates", Work in Progress, Internet-Draft, draft-tt-
+              netmod-yang-config-templates-04, 22 September 2026,
+              <https://datatracker.ietf.org/doc/html/draft-tt-netmod-
+              yang-config-templates-04>.
+
+   [RFC6022]  Scott, M. and M. Bjorklund, "YANG Module for NETCONF
+              Monitoring", RFC 6022, DOI 10.17487/RFC6022, October 2010,
+              <https://www.rfc-editor.org/info/rfc6022>.
+
+   [RFC7952]  Lhotka, L., "Defining and Using Metadata with YANG",
+              RFC 7952, DOI 10.17487/RFC7952, August 2016,
+              <https://www.rfc-editor.org/info/rfc7952>.
+
+   [RFC8343]  Bjorklund, M., "A YANG Data Model for Interface
+              Management", RFC 8343, DOI 10.17487/RFC8343, March 2018,
+              <https://www.rfc-editor.org/info/rfc8343>.
+
+   [RFC8526]  Bjorklund, M., Schoenwaelder, J., Shafer, P., Watsen, K.,
+              and R. Wilton, "NETCONF Extensions to Support the Network
+              Management Datastore Architecture", RFC 8526,
+              DOI 10.17487/RFC8526, March 2019,
+              <https://www.rfc-editor.org/info/rfc8526>.
+
+   [RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
+              RFC 8528, DOI 10.17487/RFC8528, March 2019,
+              <https://www.rfc-editor.org/info/rfc8528>.
+
+   [RFC8532]  Kumar, D., Wang, Z., Wu, Q., Ed., Rahman, R., and S.
+              Raghavan, "Generic YANG Data Model for the Management of
+              Operations, Administration, and Maintenance (OAM)
+              Protocols That Use Connectionless Communications",
+              RFC 8532, DOI 10.17487/RFC8532, April 2019,
+              <https://www.rfc-editor.org/info/rfc8532>.
+
+   [RFC8639]  Voit, E., Clemm, A., Gonzalez Prieto, A., Nilsen-Nygaard,
+              E., and A. Tripathy, "Subscription to YANG Notifications",
+              RFC 8639, DOI 10.17487/RFC8639, September 2019,
+              <https://www.rfc-editor.org/info/rfc8639>.
+
+   [RFC8641]  Clemm, A. and E. Voit, "Subscription to YANG Notifications
+              for Datastore Updates", RFC 8641, DOI 10.17487/RFC8641,
+              September 2019, <https://www.rfc-editor.org/info/rfc8641>.
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 29]
+
+Internet-Draft             anydata validation               October 2026
+
+
+   [RFC8791]  Bierman, A., Björklund, M., and K. Watsen, "YANG Data
+              Structure Extensions", RFC 8791, DOI 10.17487/RFC8791,
+              June 2020, <https://www.rfc-editor.org/info/rfc8791>.
+
+   [RFC9144]  Clemm, A., Qu, Y., Tantsura, J., and A. Bierman,
+              "Comparison of Network Management Datastore Architecture
+              (NMDA) Datastores", RFC 9144, DOI 10.17487/RFC9144,
+              December 2021, <https://www.rfc-editor.org/info/rfc9144>.
+
+   [RFC9195]  Lengyel, B. and B. Claise, "A File Format for YANG
+              Instance Data", RFC 9195, DOI 10.17487/RFC9195, February
+              2022, <https://www.rfc-editor.org/info/rfc9195>.
+
+Acknowledgements
+
+   The authors would like to thank Jean Quilbeuf, Benoit Claise, and
+   Alex Huang Feng for their review and valuable comments.
+
+Authors' Addresses
+
+   Ahmed Elhassany
+   Swisscom
+   Binzring 17
+   CH-8045 Zurich
+   Switzerland
+   Email: ahmed.elhassany@swisscom.com
+
+
+   Thomas Graf
+   Swisscom
+   Binzring 17
+   CH-8045 Zurich
+   Switzerland
+   Email: thomas.graf@swisscom.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Elhassany & Graf          Expires 12 April 2027                [Page 30]
