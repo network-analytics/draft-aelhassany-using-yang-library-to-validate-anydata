@@ -5,11 +5,11 @@
 NETMOD                                                      A. Elhassany
 Internet-Draft                                                   T. Graf
 Intended status: Informational                                  Swisscom
-Expires: 12 April 2027                                    9 October 2026
+Expires: 28 April 2027                                   25 October 2026
 
 
                Validating anydata in YANG Library context
-              draft-ietf-netmod-yang-anydata-validation-01
+             draft-netana-netmod-yang-anydata-validation-00
 
 Abstract
 
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 April 2027.
+   This Internet-Draft will expire on 28 April 2027.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 1]
+Elhassany & Graf          Expires 28 April 2027                 [Page 1]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 2]
+Elhassany & Graf          Expires 28 April 2027                 [Page 2]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -120,19 +120,19 @@ Internet-Draft             anydata validation               October 2026
    represent an unknown set of nodes that can be modeled with YANG, but
    whose data model is not known at module design time.  The same
    section notes that the data model for anydata content can become
-   known through protocol signaling or other means, but it does not
-   require this and leaves those means out of scope.
+   known through protocol signaling or other means and leaves those
+   means out of scope nor requires them.
 
    Many IETF YANG modules use "anydata" (see Section 3), including
    [RFC8040], [RFC8072], [RFC8526], [RFC8639], [RFC8641], [RFC9144], and
    [RFC9195].  In most of these uses, the content is not arbitrary: the
    defining document states in prose that it is YANG instance data from
-   a datastore, instantiated from the same modules the producer
+   a YANG datastore, instantiated from the same modules the producer
    implements.  When a server receives such content as input, for
    example the value of a YANG Patch edit, it validates the content
    against its own schema and datastore as part of processing the
    operation.  When anydata content is produced as output, however, for
-   example in a YANG-Push notification or the reply to a datastore
+   example in YANG-Push notifications or the reply to a datastore
    comparison, no such step exists on the receiving side.  Current YANG
    implementations accept any well-formed, namespace-qualified content
    there and do not validate it against any YANG schema: not data types
@@ -165,7 +165,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 3]
+Elhassany & Graf          Expires 28 April 2027                 [Page 3]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -221,7 +221,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 4]
+Elhassany & Graf          Expires 28 April 2027                 [Page 4]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -277,7 +277,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 5]
+Elhassany & Graf          Expires 28 April 2027                 [Page 5]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -319,7 +319,7 @@ Internet-Draft             anydata validation               October 2026
       the "anydata" node in the encoded message.
 
    fragment:  Content that is part of a data tree but leaves out nodes
-      of that data tree, for example because a selection filter, an
+      of that data tree, for example, because a selection filter, an
       edit, or a configuration template selects only part of it.
 
    schema context:  The set of YANG modules, with their revisions,
@@ -333,7 +333,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 6]
+Elhassany & Graf          Expires 28 April 2027                 [Page 6]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -389,7 +389,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 7]
+Elhassany & Graf          Expires 28 April 2027                 [Page 7]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -445,7 +445,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 8]
+Elhassany & Graf          Expires 28 April 2027                 [Page 8]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -501,7 +501,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                 [Page 9]
+Elhassany & Graf          Expires 28 April 2027                 [Page 9]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -557,7 +557,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 10]
+Elhassany & Graf          Expires 28 April 2027                [Page 10]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -613,7 +613,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 11]
+Elhassany & Graf          Expires 28 April 2027                [Page 11]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -669,7 +669,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 12]
+Elhassany & Graf          Expires 28 April 2027                [Page 12]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -725,7 +725,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 13]
+Elhassany & Graf          Expires 28 April 2027                [Page 13]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -781,7 +781,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 14]
+Elhassany & Graf          Expires 28 April 2027                [Page 14]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -837,7 +837,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 15]
+Elhassany & Graf          Expires 28 April 2027                [Page 15]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -893,7 +893,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 16]
+Elhassany & Graf          Expires 28 April 2027                [Page 16]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -949,7 +949,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 17]
+Elhassany & Graf          Expires 28 April 2027                [Page 17]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1005,7 +1005,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 18]
+Elhassany & Graf          Expires 28 April 2027                [Page 18]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1061,7 +1061,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 19]
+Elhassany & Graf          Expires 28 April 2027                [Page 19]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1072,7 +1072,7 @@ Internet-Draft             anydata validation               October 2026
    new annotations.  The validation context applies to the whole content
    of one "anydata" instance and is known when the content is produced;
    it is not a property of individual nodes.  The uses surveyed in
-   Section 3 already carry the anchor and the datastore next to the
+   Section 3 already carries the anchor and the datastore next to the
    "anydata" node, in the YANG Patch target, the template data-path, or
    the subscription, so an annotation would duplicate them.  An
    annotation remains possible for a use that carries neither, and this
@@ -1117,7 +1117,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 20]
+Elhassany & Graf          Expires 28 April 2027                [Page 20]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1173,7 +1173,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 21]
+Elhassany & Graf          Expires 28 April 2027                [Page 21]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1229,7 +1229,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 22]
+Elhassany & Graf          Expires 28 April 2027                [Page 22]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1285,7 +1285,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 23]
+Elhassany & Graf          Expires 28 April 2027                [Page 23]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1341,7 +1341,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 24]
+Elhassany & Graf          Expires 28 April 2027                [Page 24]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1397,7 +1397,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 25]
+Elhassany & Graf          Expires 28 April 2027                [Page 25]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1453,7 +1453,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 26]
+Elhassany & Graf          Expires 28 April 2027                [Page 26]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1509,7 +1509,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 27]
+Elhassany & Graf          Expires 28 April 2027                [Page 27]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1565,7 +1565,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 28]
+Elhassany & Graf          Expires 28 April 2027                [Page 28]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1621,7 +1621,7 @@ Internet-Draft             anydata validation               October 2026
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 29]
+Elhassany & Graf          Expires 28 April 2027                [Page 29]
 
 Internet-Draft             anydata validation               October 2026
 
@@ -1677,4 +1677,4 @@ Authors' Addresses
 
 
 
-Elhassany & Graf          Expires 12 April 2027                [Page 30]
+Elhassany & Graf          Expires 28 April 2027                [Page 30]

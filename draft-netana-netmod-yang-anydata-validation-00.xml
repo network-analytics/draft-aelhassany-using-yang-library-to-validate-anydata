@@ -7,7 +7,7 @@
 <!ENTITY wj "&#8288;">
 ]>
 <rfc category="info" consensus="true"
-     docName="draft-ietf-netmod-yang-anydata-validation-01"
+     docName="draft-netana-netmod-yang-anydata-validation-00"
      ipr="trust200902" obsoletes="" sortRefs="true"
      submissionType="IETF" symRefs="true" tocInclude="true" updates=""
      version="3" xml:lang="en"
@@ -58,7 +58,7 @@
       </address>
     </author>
 
-    <date day="09" month="October" year="2026"/>
+    <date day="25" month="October" year="2026"/>
 
     <area>General</area>
 
@@ -84,8 +84,7 @@
       with YANG, but whose data model is not known at module design
       time. The same section notes that the data model for anydata
       content can become known through protocol signaling or other
-      means, but it does not require this and leaves those means out of
-      scope.</t>
+      means and leaves those means out of scope nor requires them.</t>
 
       <t>Many IETF YANG modules use "anydata" (see <xref
       target="survey"/>), including <xref target="RFC8040"/>, <xref
@@ -93,13 +92,13 @@
       target="RFC8639"/>, <xref target="RFC8641"/>, <xref
       target="RFC9144"/>, and <xref target="RFC9195"/>. In most of these
       uses, the content is not arbitrary: the defining document states
-      in prose that it is YANG instance data from a datastore,
+      in prose that it is YANG instance data from a YANG datastore,
       instantiated from the same modules the producer implements. When a
       server receives such content as input, for example the value of a
       YANG Patch edit, it validates the content against its own schema
       and datastore as part of processing the operation. When anydata
-      content is produced as output, however, for example in a YANG-Push
-      notification or the reply to a datastore comparison, no such step
+      content is produced as output, however, for example in YANG-Push
+      notifications or the reply to a datastore comparison, no such step
       exists on the receiving side. Current YANG implementations accept
       any well-formed, namespace-qualified content there and do not
       validate it against any YANG schema: not data types or ranges, and
@@ -262,7 +261,7 @@
         <dt>fragment:</dt>
 
         <dd>Content that is part of a data tree but leaves out nodes of
-        that data tree, for example because a selection filter, an edit,
+        that data tree, for example, because a selection filter, an edit,
         or a configuration template selects only part of it.</dd>
 
         <dt>schema context:</dt>
@@ -1289,7 +1288,7 @@
         The validation context applies to the whole content of one
         "anydata" instance and is known when the content is produced;
         it is not a property of individual nodes. The uses surveyed in
-        <xref target="survey"/> already carry the anchor and the
+        <xref target="survey"/> already carries the anchor and the
         datastore next to the "anydata" node, in the YANG Patch target,
         the template data-path, or the subscription, so an annotation
         would duplicate them. An annotation remains possible for a use
